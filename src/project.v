@@ -704,12 +704,12 @@ logic [31:0] FpgaPins_Fpga_CPU_Dmem_value_a4 [7:0],
              FpgaPins_Fpga_CPU_Dmem_value_a5 [7:0];
 
 // For /fpga_pins/fpga|cpu/imem$value.
-logic [31:0] FpgaPins_Fpga_CPU_Imem_value_a1 [31:0],
-             FpgaPins_Fpga_CPU_Imem_value_a2 [31:0];
+logic [31:0] FpgaPins_Fpga_CPU_Imem_value_a1 [15:0],
+             FpgaPins_Fpga_CPU_Imem_value_a2 [15:0];
 
 // For /fpga_pins/fpga|cpu/xreg$value.
-logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
-             FpgaPins_Fpga_CPU_Xreg_value_a4 [31:0];
+logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
+             FpgaPins_Fpga_CPU_Xreg_value_a4 [15:0];
 
 
 
@@ -949,18 +949,18 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
             end
 
             //
-            // Scope: /imem[31:0]
+            // Scope: /imem[15:0]
             //
-            for (imem = 0; imem <= 31; imem++) begin : L1gen_FpgaPins_Fpga_CPU_Imem
+            for (imem = 0; imem <= 15; imem++) begin : L1gen_FpgaPins_Fpga_CPU_Imem
                // Staging of $value.
                always_ff @(posedge clk) FpgaPins_Fpga_CPU_Imem_value_a2[imem][31:0] <= FpgaPins_Fpga_CPU_Imem_value_a1[imem][31:0];
 
             end
 
             //
-            // Scope: /xreg[31:0]
+            // Scope: /xreg[15:0]
             //
-            for (xreg = 0; xreg <= 31; xreg++) begin : L1gen_FpgaPins_Fpga_CPU_Xreg
+            for (xreg = 0; xreg <= 15; xreg++) begin : L1gen_FpgaPins_Fpga_CPU_Xreg
                // Staging of $value.
                always_ff @(posedge clk) FpgaPins_Fpga_CPU_Xreg_value_a4[xreg][31:0] <= FpgaPins_Fpga_CPU_Xreg_value_a3[xreg][31:0];
 
@@ -1203,9 +1203,9 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
                end
 
                //
-               // Scope: /imem[31:0]
+               // Scope: /imem[15:0]
                //
-               for (imem = 0; imem <= 31; imem++) begin : \/imem 
+               for (imem = 0; imem <= 15; imem++) begin : \/imem 
                   (* keep *) logic [31:0] \////@1$value ;
                   assign \////@1$value = FpgaPins_Fpga_CPU_Imem_value_a1[imem];
                   (* keep *) logic  \////@1$wr ;
@@ -1213,9 +1213,9 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
                end
 
                //
-               // Scope: /xreg[31:0]
+               // Scope: /xreg[15:0]
                //
-               for (xreg = 0; xreg <= 31; xreg++) begin : \/xreg 
+               for (xreg = 0; xreg <= 15; xreg++) begin : \/xreg 
                   (* keep *) logic [31:0] \////@3$value ;
                   assign \////@3$value = FpgaPins_Fpga_CPU_Xreg_value_a3[xreg];
                   (* keep *) logic  \////@3$wr ;
@@ -1281,7 +1281,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
                      assign FpgaPins_Fpga_CPU_imem_addr_a0[5:0] = (FpgaPins_Fpga_CPU_reset_a0) ? spi_prog_addr : FpgaPins_Fpga_CPU_pc_a0[7:2];
             
                   //_@1
-                     for (imem = 0; imem <= 31; imem++) begin : L1_FpgaPins_Fpga_CPU_Imem //_/imem
+                     for (imem = 0; imem <= 15; imem++) begin : L1_FpgaPins_Fpga_CPU_Imem //_/imem
 
                         // For $wr.
                         logic L1_wr_a1;
@@ -1509,7 +1509,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
                   //_\source /raw.githubusercontent.com/efabless/chipcraftmestcourse/main/tlvlib/riscvshelllib.tlv 33   // Instantiated from top.tlv, 292 as: m4+rf(@2, @3)
                      // Reg File
                      //_@3
-                        for (xreg = 0; xreg <= 31; xreg++) begin : L1_FpgaPins_Fpga_CPU_Xreg //_/xreg
+                        for (xreg = 0; xreg <= 15; xreg++) begin : L1_FpgaPins_Fpga_CPU_Xreg //_/xreg
 
                            // For $wr.
                            logic L1_wr_a3;
@@ -1521,9 +1521,9 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
                         end
                      //_@2
                         //_?$rf_rd_en1
-                           assign FpgaPins_Fpga_CPU_rf_rd_data1_a2[31:0] = FpgaPins_Fpga_CPU_Xreg_value_a4[FpgaPins_Fpga_CPU_rf_rd_index1_a2[4:0]];
+                           assign FpgaPins_Fpga_CPU_rf_rd_data1_a2[31:0] = FpgaPins_Fpga_CPU_Xreg_value_a4[FpgaPins_Fpga_CPU_rf_rd_index1_a2[3:0]];
                         //_?$rf_rd_en2
-                           assign FpgaPins_Fpga_CPU_rf_rd_data2_a2[31:0] = FpgaPins_Fpga_CPU_Xreg_value_a4[FpgaPins_Fpga_CPU_rf_rd_index2_a2[4:0]];
+                           assign FpgaPins_Fpga_CPU_rf_rd_data2_a2[31:0] = FpgaPins_Fpga_CPU_Xreg_value_a4[FpgaPins_Fpga_CPU_rf_rd_index2_a2[3:0]];
                         `BOGUS_USE(FpgaPins_Fpga_CPU_rf_rd_data1_a2 FpgaPins_Fpga_CPU_rf_rd_data2_a2)
                   //_\end_source  // Args: (read stage, write stage) - if equal, no register bypass is required
                   //_\source /raw.githubusercontent.com/efabless/chipcraftmestcourse/main/tlvlib/riscvshelllib.tlv 50   // Instantiated from top.tlv, 293 as: m4+dmem(@4)
