@@ -55,7 +55,7 @@ module SPI_Peripheral
   output reg cmd_error,                 // Asserts when an invalid cmd is given, must reset to clear
   output reg imem_wr_en,                // Write enable for imem
   output reg [31:0] prog_instr,         // Instr to write to imem
-  output reg [5:0] prog_addr,           // Address to write select imem
+  output reg [3:0] prog_addr,           // Address to write select imem
 
   // SPI Interface
   input wire sclk,                      // SPI clock
@@ -83,7 +83,7 @@ module SPI_Peripheral
   reg [7:0] hl_byte;  // data word [23:16]
   reg [7:0] lh_byte;  // data word [15:8]
   reg [7:0] ll_byte;   // data word [7:0]
-  reg [5:0] imem_address;        // Instr Mem Address
+  reg [3:0] imem_address;        // Instr Mem Address
 
   // rx spi and global cock domain crossing
   // assert rx_valid for 1 cycle when rx_buff is valid
@@ -166,14 +166,14 @@ module SPI_Peripheral
         cpu_rst_n <= 1'b0;
         imem_wr_en <= 1'b0;
         cmd_error <= 1'b0;
-        prog_addr <= 6'b00_0000;
+        prog_addr <= 4'b0000;
         prog_instr <= 32'h00_00_00_00;
 
         hh_byte <= 8'h00;
         hl_byte <= 8'h00;
         lh_byte <= 8'h00;
         ll_byte <= 8'h00;
-        imem_address <= 6'h0;
+        imem_address <= 4'h0;
 
         rx_grab_cmd_n <= 1'b0;
         rx_cmd <= 8'h00;
@@ -202,7 +202,7 @@ module SPI_Peripheral
                          hh_byte <= r_rx_buff;
                         end
                 8'hc4 : begin
-                         imem_address <= r_rx_buff[5:0];
+                         imem_address <= r_rx_buff[3:0];
                         end
                 8'hc5 : begin
                          prog_addr <= imem_address;
@@ -264,7 +264,7 @@ module tt_um_example (
                          // [8] [7:0] - rx_valid + rx_buff
 
    logic [31:0] spi_prog_instr;
-   logic [5:0] spi_prog_addr;
+   logic [3:0] spi_prog_addr;
    logic spi_imem_wr_en;
    logic spi_cpu_rst_n;
 
@@ -372,7 +372,7 @@ logic [6:0] FpgaPins_Fpga_CPU_func7_a1;
 logic FpgaPins_Fpga_CPU_func7_valid_a1;
 
 // For /fpga_pins/fpga|cpu$imem_addr.
-logic [5:0] FpgaPins_Fpga_CPU_imem_addr_a0,
+logic [3:0] FpgaPins_Fpga_CPU_imem_addr_a0,
             FpgaPins_Fpga_CPU_imem_addr_a1;
 
 // For /fpga_pins/fpga|cpu$imem_rd_data.
@@ -735,7 +735,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
             always_ff @(posedge clk) FpgaPins_Fpga_CPU_cycle_count_a5[31:0] <= FpgaPins_Fpga_CPU_cycle_count_a4[31:0];
 
             // Staging of $imem_addr.
-            always_ff @(posedge clk) FpgaPins_Fpga_CPU_imem_addr_a1[5:0] <= FpgaPins_Fpga_CPU_imem_addr_a0[5:0];
+            always_ff @(posedge clk) FpgaPins_Fpga_CPU_imem_addr_a1[3:0] <= FpgaPins_Fpga_CPU_imem_addr_a0[3:0];
 
             // Staging of $imem_rd_en.
             always_ff @(posedge clk) FpgaPins_Fpga_CPU_imem_rd_en_a1 <= FpgaPins_Fpga_CPU_imem_rd_en_a0;
@@ -1039,7 +1039,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
                assign \///?$func7_valid@1$func7 = FpgaPins_Fpga_CPU_func7_a1;
                (* keep *) logic  \///@1$func7_valid ;
                assign \///@1$func7_valid = FpgaPins_Fpga_CPU_func7_valid_a1;
-               (* keep *) logic [5:0] \///@0$imem_addr ;
+               (* keep *) logic [3:0] \///@0$imem_addr ;
                assign \///@0$imem_addr = FpgaPins_Fpga_CPU_imem_addr_a0;
                (* keep *) logic [31:0] \///?$imem_rd_en@1$imem_rd_data ;
                assign \///?$imem_rd_en@1$imem_rd_data = FpgaPins_Fpga_CPU_imem_rd_data_a1;
@@ -1278,7 +1278,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
             
                      // instruction fetch
                      assign FpgaPins_Fpga_CPU_imem_rd_en_a0 = !FpgaPins_Fpga_CPU_reset_a0;
-                     assign FpgaPins_Fpga_CPU_imem_addr_a0[5:0] = (FpgaPins_Fpga_CPU_reset_a0) ? spi_prog_addr : FpgaPins_Fpga_CPU_pc_a0[7:2];
+                     assign FpgaPins_Fpga_CPU_imem_addr_a0[3:0] = (FpgaPins_Fpga_CPU_reset_a0) ? spi_prog_addr : FpgaPins_Fpga_CPU_pc_a0[5:2];
             
                   //_@1
                      for (imem = 0; imem <= 15; imem++) begin : L1_FpgaPins_Fpga_CPU_Imem //_/imem
@@ -1286,13 +1286,13 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
                         // For $wr.
                         logic L1_wr_a1;
 
-                        assign L1_wr_a1 = FpgaPins_Fpga_CPU_imem_wr_en_a1 && (FpgaPins_Fpga_CPU_imem_addr_a1[5:0] == imem);
+                        assign L1_wr_a1 = FpgaPins_Fpga_CPU_imem_wr_en_a1 && (FpgaPins_Fpga_CPU_imem_addr_a1[3:0] == imem);
                         assign FpgaPins_Fpga_CPU_Imem_value_a1[imem][31:0] = reset ? imem :
                                        L1_wr_a1    ? FpgaPins_Fpga_CPU_imem_wr_data_a1 :
                                                 FpgaPins_Fpga_CPU_Imem_value_a2[imem][31:0];
                      end
                      //_?$imem_rd_en
-                        assign FpgaPins_Fpga_CPU_imem_rd_data_a1[31:0] = FpgaPins_Fpga_CPU_Imem_value_a2[FpgaPins_Fpga_CPU_imem_addr_a1[5:0]];
+                        assign FpgaPins_Fpga_CPU_imem_rd_data_a1[31:0] = FpgaPins_Fpga_CPU_Imem_value_a2[FpgaPins_Fpga_CPU_imem_addr_a1[3:0]];
             
             
                      assign FpgaPins_Fpga_CPU_imem_wr_en_a1 = spi_imem_wr_en;
