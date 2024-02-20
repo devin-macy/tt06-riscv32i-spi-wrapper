@@ -258,6 +258,7 @@ module tt_um_example (
    logic [31:0] spi_csr; // [31:18] - unused
                          // [17] [16:9] - tx_valid + tx_buff
                          // [8] [7:0] - rx_valid + rx_buff
+
    logic [31:0] spi_prog_instr;
    logic [5:0] spi_prog_addr;
    logic spi_imem_wr_en;
@@ -266,12 +267,17 @@ module tt_um_example (
    logic spi_cpu_rst = ! spi_cpu_rst_n;
    wire reset = ! rst_n;
 
+   logic [7:0] o_uio_oe = 8'b0011_1000;
+   logic [7:0] o_uo_out = 8'b0;
+   assign uio_oe = o_uio_oe;
+   assign uo_out = o_uo_out;
+
    SPI_Peripheral spi (
 		.clk(clk),
       .rst_n(rst_n),
 
       // control and status registers
-      .mode(uo_out[1]),
+      .mode(uio_out[4]),
       .rx_buff(spi_csr[7:0]),
       .rx_valid(spi_csr[8]),
       .tx_buff(spi_csr[16:9]),
@@ -279,16 +285,16 @@ module tt_um_example (
 
       // cpu boot signals
       .cpu_rst_n(spi_cpu_rst_n),
-      .cmd_error(uo_out[2]),
+      .cmd_error(uio_out[5]),
       .imem_wr_en(spi_imem_wr_en),
       .prog_instr(spi_prog_instr),
       .prog_addr(spi_prog_addr),
 
       // spi interface
-      .sclk(ui_in[0]),
-      .cs(ui_in[1]),
-      .mosi(ui_in[2]),
-      .miso(uo_out[0])
+      .sclk(uio_in[0]),
+      .cs(uio_in[1]),
+      .mosi(uio_in[2]),
+      .miso(uio_out[3])
 
    );
 
@@ -1228,7 +1234,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
 //_\TLV
    /* verilator lint_off UNOPTFLAT */
    // Connect Tiny Tapeout I/Os to Virtual FPGA Lab.
-   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/35e36bd144fddd75495d4cbc01c4fc50ac5bde6f/tlvlib/tinytapeoutlib.tlv 76   // Instantiated from top.tlv, 585 as: m5+tt_connections()
+   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/35e36bd144fddd75495d4cbc01c4fc50ac5bde6f/tlvlib/tinytapeoutlib.tlv 76   // Instantiated from top.tlv, 591 as: m5+tt_connections()
       assign L0_slideswitch_a0[7:0] = ui_in;
       assign L0_sseg_segment_n_a0[6:0] = ~ uo_out[6:0];
       assign L0_sseg_decimal_point_n_a0 = ~ uo_out[7];
@@ -1236,7 +1242,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
    //_\end_source
 
    // Instantiate the Virtual FPGA Lab.
-   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv 307   // Instantiated from top.tlv, 588 as: m5+board(/top, /fpga, 7, $, , cpu)
+   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv 307   // Instantiated from top.tlv, 594 as: m5+board(/top, /fpga, 7, $, , cpu)
       
       //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv 355   // Instantiated from /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv, 309 as: m4+thanks(m5__l(309)m5_eval(m5_get(BOARD_THANKS_ARGS)))
          //_/thanks
@@ -1570,7 +1576,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
       
    //_\end_source
    // Label the switch inputs [0..7] (1..8 on the physical switch panel) (top-to-bottom).
-   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/35e36bd144fddd75495d4cbc01c4fc50ac5bde6f/tlvlib/tinytapeoutlib.tlv 82   // Instantiated from top.tlv, 590 as: m5+tt_input_labels_viz(⌈"UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED"⌉)
+   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/35e36bd144fddd75495d4cbc01c4fc50ac5bde6f/tlvlib/tinytapeoutlib.tlv 82   // Instantiated from top.tlv, 596 as: m5+tt_input_labels_viz(⌈"UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED"⌉)
       for (input_label = 0; input_label <= 7; input_label++) begin : L1_InputLabel //_/input_label
          
       end
