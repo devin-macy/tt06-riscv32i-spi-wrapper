@@ -1,10 +1,10 @@
 # Tiny Tapeout project information
 project:
-  title:        ""      # Project title
-  author:       ""      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
-  language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
+  title:        "RISCV32I with spi wrapper"      # Project title
+  author:       "Devin Macy"      # Your name
+  discord:      "metzeri"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
+  description:  "A mostly support riscv32i CPU with a bare bones spi wrapper allowing you to upload programs to instruction memory and echo information sent through SPI"      # One line description of what your project does
+  language:     "SystemVerilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
