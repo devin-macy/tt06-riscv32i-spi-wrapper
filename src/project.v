@@ -271,7 +271,7 @@ module tt_um_example (
    assign uio_out = 8'b1;
    assign uo_out[2:0] = 3'b0;
    assign uo_out[7:6] = 2'b0;
-   assign spi_csr[31:18] = 'b0;
+   assign spi_csr[31:18] = 14'b0;
 
    SPI_Peripheral spi (
 		.clk(clk),
@@ -657,8 +657,8 @@ logic FpgaPins_Fpga_CPU_sltiu_rslt_a3;
 // For /fpga_pins/fpga|cpu$sltu_rslt.
 logic FpgaPins_Fpga_CPU_sltu_rslt_a3;
 
-// For /fpga_pins/fpga|cpu$spi_csr.
-logic [31:0] FpgaPins_Fpga_CPU_spi_csr_a4;
+// For /fpga_pins/fpga|cpu$spi_csr_out.
+logic [31:0] FpgaPins_Fpga_CPU_spi_csr_out_a4;
 
 // For /fpga_pins/fpga|cpu$spi_current_instr.
 logic [31:0] FpgaPins_Fpga_CPU_spi_current_instr_a4;
@@ -1168,8 +1168,8 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
                assign \///@3$sltiu_rslt = FpgaPins_Fpga_CPU_sltiu_rslt_a3;
                (* keep *) logic  \///@3$sltu_rslt ;
                assign \///@3$sltu_rslt = FpgaPins_Fpga_CPU_sltu_rslt_a3;
-               (* keep *) logic [31:0] \///@4$spi_csr ;
-               assign \///@4$spi_csr = FpgaPins_Fpga_CPU_spi_csr_a4;
+               (* keep *) logic [31:0] \///@4$spi_csr_out ;
+               assign \///@4$spi_csr_out = FpgaPins_Fpga_CPU_spi_csr_out_a4;
                (* keep *) logic [31:0] \///@4$spi_current_instr ;
                assign \///@4$spi_current_instr = FpgaPins_Fpga_CPU_spi_current_instr_a4;
                (* keep *) logic [31:0] \///@2$src1_value ;
@@ -1467,17 +1467,17 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
                   //_@4
                      // data memory
                      assign FpgaPins_Fpga_CPU_dmem_addr_a4[2:0] = FpgaPins_Fpga_CPU_result_a4[4:2];
-                     assign FpgaPins_Fpga_CPU_dmem_wr_en_a4 = FpgaPins_Fpga_CPU_valid_a4 && FpgaPins_Fpga_CPU_is_s_instr_a4 && ((FpgaPins_Fpga_CPU_result_a4[4:2] != 3'b0) || (FpgaPins_Fpga_CPU_result_a4[4:2] != 3'b011));
+                     assign FpgaPins_Fpga_CPU_dmem_wr_en_a4 = FpgaPins_Fpga_CPU_valid_a4 && FpgaPins_Fpga_CPU_is_s_instr_a4 && ((FpgaPins_Fpga_CPU_result_a4[4:2] != 3'b0) || (FpgaPins_Fpga_CPU_result_a4[4:2] != 3'b001) || (FpgaPins_Fpga_CPU_result_a4[4:2] != 3'b010));
                      assign FpgaPins_Fpga_CPU_dmem_wr_data_a4[31:0] = FpgaPins_Fpga_CPU_src2_value_a4;
                      assign FpgaPins_Fpga_CPU_dmem_rd_en_a4 = FpgaPins_Fpga_CPU_is_load_a4 && ((FpgaPins_Fpga_CPU_result_a4[4:2] != 3'b0)|| (FpgaPins_Fpga_CPU_result_a4[4:2] != 3'b011));
                      assign FpgaPins_Fpga_CPU_ld_data_a4[31:0] = (FpgaPins_Fpga_CPU_result_a4[4:2] == 3'b0)   ? FpgaPins_Fpga_CPU_cycle_count_a4 :
-                                      (FpgaPins_Fpga_CPU_result_a4[4:2] == 3'b001) ? FpgaPins_Fpga_CPU_spi_csr_a4 :
+                                      (FpgaPins_Fpga_CPU_result_a4[4:2] == 3'b001) ? FpgaPins_Fpga_CPU_spi_csr_out_a4:
                                       (FpgaPins_Fpga_CPU_result_a4[4:2] == 3'b010) ? FpgaPins_Fpga_CPU_spi_current_instr_a4 :
                                                                  FpgaPins_Fpga_CPU_dmem_rd_data_a4[31:0];
             
                      // CSRs
                      assign FpgaPins_Fpga_CPU_cycle_count_a4[31:0] = (FpgaPins_Fpga_CPU_reset_a4) ? 32'd0 : FpgaPins_Fpga_CPU_cycle_count_a5 + 1;  // dmem[0]
-                     assign FpgaPins_Fpga_CPU_spi_csr_a4[31:0] = spi_csr;                                    // dmem[1]
+                     assign FpgaPins_Fpga_CPU_spi_csr_out_a4[31:0] = spi_csr[31:0];                          // dmem[1]
                      assign FpgaPins_Fpga_CPU_spi_current_instr_a4[31:0] = spi_prog_instr;                   // dmem[2]
             
             
