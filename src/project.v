@@ -129,7 +129,7 @@ module SPI_Peripheral
   end
 
   // register tx byte when tx_valid pulse comes, initiating transfer
-  // not implemented - signals tied to ground
+  // not implemented - driving signals tied to ground
   /*
   always @(posedge clk) begin
      if(~rst_n) begin
@@ -704,8 +704,8 @@ logic [31:0] FpgaPins_Fpga_CPU_Dmem_value_a4 [7:0],
              FpgaPins_Fpga_CPU_Dmem_value_a5 [7:0];
 
 // For /fpga_pins/fpga|cpu/imem$value.
-logic [31:0] FpgaPins_Fpga_CPU_Imem_value_a1 [63:0],
-             FpgaPins_Fpga_CPU_Imem_value_a2 [63:0];
+logic [31:0] FpgaPins_Fpga_CPU_Imem_value_a1 [31:0],
+             FpgaPins_Fpga_CPU_Imem_value_a2 [31:0];
 
 // For /fpga_pins/fpga|cpu/xreg$value.
 logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
@@ -949,9 +949,9 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
             end
 
             //
-            // Scope: /imem[63:0]
+            // Scope: /imem[31:0]
             //
-            for (imem = 0; imem <= 63; imem++) begin : L1gen_FpgaPins_Fpga_CPU_Imem
+            for (imem = 0; imem <= 31; imem++) begin : L1gen_FpgaPins_Fpga_CPU_Imem
                // Staging of $value.
                always_ff @(posedge clk) FpgaPins_Fpga_CPU_Imem_value_a2[imem][31:0] <= FpgaPins_Fpga_CPU_Imem_value_a1[imem][31:0];
 
@@ -1203,9 +1203,9 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
                end
 
                //
-               // Scope: /imem[63:0]
+               // Scope: /imem[31:0]
                //
-               for (imem = 0; imem <= 63; imem++) begin : \/imem 
+               for (imem = 0; imem <= 31; imem++) begin : \/imem 
                   (* keep *) logic [31:0] \////@1$value ;
                   assign \////@1$value = FpgaPins_Fpga_CPU_Imem_value_a1[imem];
                   (* keep *) logic  \////@1$wr ;
@@ -1281,7 +1281,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [31:0],
                      assign FpgaPins_Fpga_CPU_imem_addr_a0[5:0] = (FpgaPins_Fpga_CPU_reset_a0) ? spi_prog_addr : FpgaPins_Fpga_CPU_pc_a0[7:2];
             
                   //_@1
-                     for (imem = 0; imem <= 63; imem++) begin : L1_FpgaPins_Fpga_CPU_Imem //_/imem
+                     for (imem = 0; imem <= 31; imem++) begin : L1_FpgaPins_Fpga_CPU_Imem //_/imem
 
                         // For $wr.
                         logic L1_wr_a1;
