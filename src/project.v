@@ -23,7 +23,7 @@ module top(input logic clk, input logic reset, input logic [31:0] cyc_cnt, outpu
    logic rst_n = ! reset;
 
    // Instantiate the Tiny Tapeout module.
-   tt_um_example tt(.*);
+   tt_um_riscv_spi_wrapper tt(.*);
 
    // Passed/failed to control Makerchip simulation, passed from Tiny Tapeout module's uo_out pins.
    //assign passed = uo_out[6];
@@ -245,7 +245,7 @@ endmodule
 // The Tiny Tapeout module
 // =======================
 
-module tt_um_example (
+module tt_um_riscv_spi_wrapper (
     input  wire [7:0] ui_in,    // Dedicated inputs - connected to the input switches
     output wire [7:0] uo_out,   // Dedicated outputs - connected to the 7 segment display
        // The FPGA is based on TinyTapeout 3 which has no bidirectional I/Os (vs. TT6 for the ASIC).
@@ -974,11 +974,10 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
 
 
 
-
+/*------------------------------------------------------------------------------------------------------------------------------------------
 //
 // Debug Signals
 //
-/* ---------------------------------------------------------------------------------------------------------------
 
    if (1) begin : DEBUG_SIGS_GTKWAVE
 
@@ -1239,7 +1238,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
 
 
    end
--------------------------------------------------------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------------------------------------------------------------------------------*/
 // ---------- Generated Code Ends ----------
 //_\TLV
    /* verilator lint_off UNOPTFLAT */
