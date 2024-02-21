@@ -9,7 +9,9 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-My project is a riscv32i CPU core supporting most of the bare bones instruction set. The instructions that are not supported are any instructions dealing with CSRs, harts, memory fences, or modes of operation. The cpu core has 16 words (512 bytes) of seperate instruction memory, data memory and registers. For programmability, a SPI wrapper has been added that starts in boot mode, requiring you to upload a program before the CPU can do anything. When the exit boot command is given to the SPI it will enter echo mode, releasing the cpu from reset, and repeat back any byte given to it as a sort of health check.
+My project is a riscv32i CPU core supporting most of the bare bones instruction set. The instructions that are not supported are any instructions dealing with CSRs, harts, memory fences, or modes of operation. The cpu core has 16 words (512 bytes) of instruction memory and registers and 8 words (256 bytes) of data memory.
+
+For programmability, a SPI wrapper has been added that starts in boot mode, requiring you to upload a program and entering echo mode before the CPU can do anything. When the exit boot command is given to the SPI it will enter echo mode, releasing the cpu from reset, and repeat back any byte given to it as a sort of health check. In its current state, there is no way to observe the status of the CPU not in simulation since the SPI doesn't hand over control of itself to the CPU to output data.
 
 
 
