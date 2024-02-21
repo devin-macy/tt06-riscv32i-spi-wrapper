@@ -33,8 +33,9 @@ Connect the spi signals `SCLK`, `CS`, `MOSI`, and `MISO` to their respective pin
 |re-enter boot mode          |0xC7     | re-enter boot mode, holding cpu in reset                                                 |
 |command error               |default  | invalid command was given, throw cmd_error on `uo_out[5]` high requiring a reset to clear|
 
-*The spi commands require 2-bytes per command, even if the command doesnt use the second byte<\n>
-**The current mode can be observed on `uo_out[4]`. Mode is low when in boot and high when in echo<\n>
+*The spi commands require 2-bytes per command, even if the command doesnt use the second byte
+
+**The current mode can be observed on `uo_out[4]`. Mode is low when in boot and high when in echo
 
 Toggle `CS` high then low after power on. Program the cou through spi by following a cmd,data,cmd,data cadence loading all the bytes of the instruction word, loading the address to write to, then writing to imem until you write finish writing your program to instruction memory. Send the exit boot command to release the cpu and observe the results.
 
