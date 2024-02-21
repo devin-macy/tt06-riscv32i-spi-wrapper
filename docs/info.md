@@ -15,6 +15,12 @@ For programmability, a spi wrapper has been added that starts in boot mode, requ
 
 In its current state, there is no way to observe the status of the cpu not in simulation, since the spi doesn't hand over control of itself to the cpu to output data. However the passed/failed signals on `uo_out[6]` and `uo_out[7]` respectively, check to see if register 10 is equal to 45. Which you can upload a simple program that adds numbers from 1-10 and stores them into register 10 to test functionality.
 
+This project was developed 
+
+### Impact
+
+
+
 ## How to test
 
 Have prepared a riscv32i binary of up to 16 instructions [here is a pretty good rescource for putting together binaries](https://riscvasm.lucasteske.dev/)
