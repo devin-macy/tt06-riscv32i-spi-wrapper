@@ -9,7 +9,7 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-My project is a riscv32i cpu core supporting most of the bare bones instruction set. The instructions that are not supported are any instructions dealing with csr's, harts, memory fences, or modes of operation. The cpu core has 16 words (512 bytes) of instruction memory and registers and 8 words (256 bytes) of data memory.
+My project is a 5-stage riscv32i cpu core supporting most of the bare bones instruction set. The instructions that are not supported are any instructions dealing with csr's, harts, memory fences, or modes of operation. The cpu core has 16 words (512 bytes) of instruction memory and registers and 8 words (256 bytes) of data memory.
 
 For programmability, a spi wrapper has been added that starts in boot mode, requiring you to upload a program and entering echo mode before the cpu can do anything. When the exit boot command is given to the spi it will enter echo mode, releasing the cpu from reset, and repeat back any byte given to it as a sort of health check. 
 
@@ -37,7 +37,7 @@ Connect the spi signals `SCLK`, `CS`, `MOSI`, and `MISO` to their respective pin
 
 **The current mode can be observed on `uo_out[4]`. Mode is low when in boot and high when in echo
 
-Toggle `CS` high then low after power on. Program the cou through spi by following a cmd,data,cmd,data cadence loading all the bytes of the instruction word, loading the address to write to, then writing to imem until you write finish writing your program to instruction memory. Send the exit boot command to release the cpu and observe the results.
+Toggle `CS` high then low after power on. Program the cpu through spi by following a cmd,data,cmd,data cadence loading all the bytes of the instruction word, then loading the address to write to, then writing to imem until finish writing your program to instruction memory. Send the exit boot command to release the cpu and observe the results.
 
 Here is an example (in verilog syntax) of a buffer used to program the instruction word  `addi x10, x0, 45` into address 5 then echo 0xAA
 
@@ -45,14 +45,31 @@ Here is an example (in verilog syntax) of a buffer used to program the instructi
 buff[14*8] = {8'hc0, 8'h13, 8'hc1, 8'h05, 8'hc2, 8'hd0, 8'hc3, 8'h02, 
               8'hc4, 8'h05, 8'hc5, 8'hxx, 8'hc6, 8'haa}
 ```
-Which in words is
+
+Transmitted MSB of the buffer first, and in words is
+
 ```
 buff[14*8] = {load, ll_byte, load, lh_byte, load, hl_byte, load, hh_byte,
               load, imem_addr, write imem[imem_addr], dont care, exit boot, echo data}
 ```
 
-And transmitted MSB of the buffer first
+You will need to program more than 5 instructions to really see any results, since it is a 5-stage pipeline and takes 5-cycles to see a write-back to the register file. An example program that adds up numbers 1-10 and stores them into register 10, in assembly, is as follows:
 
+```assembly
+.text
+         reset:
+            ADD x10, x0, x0             # Initialize r10 (a0) to 0
+            ADD x14, x10, x0            # Initialize sum register a4 with 0x0
+            ADDI x12, x10, 10           # Store count of 10 in register a2
+            ADD x13, x10, x0            # Initialize intermediate sum register a3 with 0
+         loop:
+            ADD x14, x13, x14           # Incremental addition
+            ADDI x13, x13, 1            # Increment count register by 1
+            BLT x13, x12, loop          # If a3 is less than a2, branch to label named <loop>
+         done:
+            ADD x10, x14, x0            # Store final result to register a0 so that it can be read by main program
+            JAL x1, done                # Infinite loop storing result to register a0 to not let PC run off into lala land
+```
 
 
 ## External hardware
