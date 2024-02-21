@@ -974,8 +974,8 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
 
 //
 // Debug Signals
-//
-
+//------------------------------------------------------------------------------------------------------------
+/*
    if (1) begin : DEBUG_SIGS_GTKWAVE
 
       (* keep *) logic [7:0] \@0$slideswitch ;
@@ -1235,7 +1235,8 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
 
 
    end
-
+*/
+//----------------------------------------------------------------------------------------------------------------------------
 // ---------- Generated Code Ends ----------
 //_\TLV
    /* verilator lint_off UNOPTFLAT */
