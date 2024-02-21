@@ -20,9 +20,9 @@ project:
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
   # Inputs
-  ui[0]: ""
-  ui[1]: ""
-  ui[2]: ""
+  ui[0]: "sclk"
+  ui[1]: "cs"
+  ui[2]: "mosi"
   ui[3]: ""
   ui[4]: ""
   ui[5]: ""
@@ -30,24 +30,24 @@ pinout:
   ui[7]: ""
 
   # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  uo[0]: "0"
+  uo[1]: "0"
+  uo[2]: "0"
+  uo[3]: "miso"
+  uo[4]: "mode"
+  uo[5]: "cmd_error"
+  uo[6]: "0"
+  uo[7]: "0"
 
-  # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  # Bidirectional pins (output)
+  uio[0]: "1"
+  uio[1]: "1"
+  uio[2]: "1"
+  uio[3]: "1"
+  uio[4]: "1"
+  uio[5]: "1"
+  uio[6]: "1"
+  uio[7]: "1"
 
 # Do not change!
 yaml_version: 6
