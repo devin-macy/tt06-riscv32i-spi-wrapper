@@ -17,12 +17,11 @@ In its current state, there is no way to observe the status of the cpu not in si
 
 ### Impact
 
-This project was developed in part with the Microelectronics Security Training Center (MEST) through the class ["ChipCraft: The Art of Chip Design for Non-Experts"](https://github.com/efabless/chipcraft---mest-course) deveoped and taught by Efabless and Redwood EDA. During the class, you learn concepts of microelectronics design
-by designing a calculator before moving to designing a 5-stage riscv32i cpu using [Makerchip](https://www.makerchip.com/) and [TL-Verilog](https://www.redwoodeda.com/tl-verilog). 
-TL-Verilog is a state-of-the-art HDL language that allows digital designers to write HDL the way they conceptualy think about a problem, instead of figuring out a problem
-according to the language.
+This project was developed in part with the Microelectronics Security Training Center (MEST) through the class ["ChipCraft: The Art of Chip Design for Non-Experts"](https://github.com/efabless/chipcraft---mest-course) deveoped and taught by Efabless and Redwood EDA. The class is designed for non-experts in the field and covers
+the entire microelectronics ecosystem including RTL design, Verification, GDS generation, tape-out process, and fabrication. 
 
-
+During the class, you get hands on experience and learn concepts of microelectronics design by designing a calculator and prototyping on an FPGA before moving to 
+designing a 5-stage riscv32i cpu using [Makerchip](https://www.makerchip.com/) and [TL-Verilog](https://www.redwoodeda.com/tl-verilog).
 
 ## How to test
 
