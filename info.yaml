@@ -4,11 +4,11 @@ project:
   author:       "Devin Macy"      # Your name
   discord:      "metzeri"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
   description:  "A mostly support riscv32i CPU with a bare bones spi wrapper allowing you to upload programs to instruction memory and echo information sent through SPI"      # One line description of what your project does
-  language:     "SystemVerilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
+  language:     "SystemVerilog, TL-Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
+  clock_hz:     50_000_000       # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "6x2"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
+  tiles: "4x2"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
 
   # Your top module name must start with "tt_um_". Make it unique by including your github username:
   top_module:  "tt_um_example"
