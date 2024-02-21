@@ -16,10 +16,10 @@
 
 module top(input logic clk, input logic reset, input logic [31:0] cyc_cnt, output logic passed, output logic failed);
    // Tiny tapeout I/O signals.
-   logic [7:0] ui_in, uo_out, uio_in, uio_out, uio_oe;
-   // logic [7:0] uio_in,  uio_out, uio_oe;
+   logic [7:0] ui_in, uo_out;
+   logic [7:0] uio_in,  uio_out, uio_oe;
    //assign ui_in = 8'b0;
-   // assign uio_in = 8'b0;
+   assign uio_in = 8'b0;
    logic ena = 1'b0;
    logic rst_n = ! reset;
 
@@ -1551,8 +1551,8 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
             
                // Connect Tiny Tapeout outputs. Note that uio_ outputs are not available in the Tiny-Tapeout-3-based FPGA boards.
                //*uo_out = {6'b0, *failed, *passed};
-               assign uio_out = 8'b0;
-               assign uio_oe = 8'b0;
+               //*uio_out = 8'b0;
+               //*uio_oe = 8'b0;
             
                // Macro instantiations to be uncommented when instructed for:
                //  o instruction memory
