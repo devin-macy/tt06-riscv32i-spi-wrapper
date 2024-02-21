@@ -23,26 +23,29 @@ Connect the spi signals `SCLK`, `CS`, `MOSI`, and `MISO` to their respective pin
 
 |command|code|description|
 |-------|----|-----------|
-|load `ll_byte`              |0xc0     | load bits 7-0 of the instruction word                                                    |
-|load `lh_byte`              |0xc1     | load bits 15-8 of the instruction word                                                   |
-|load `hl_byte`              |0xc2     | load bits 23-16 of the instruction word                                                  |
-|load `hh_byte`              |0xc3     | load bits 31-24 of the instruction word                                                  |
-|load `imem_addr`            |0xc4     | load what 3-bit address you want to write the previously built instruction word to       |
-|write to `imem[imem_addr]`  |0xc5     | write built instruction to address loaded into imem_addr                                 |
-|exit boot mode              |0xc6     | enter echo mode, echoing back any byte given afterwards                                  |
-|re-enter boot mode          |0xc7     | re-enter boot mode, holding cpu in reset                                                 |
-|command error               |default  | invalid command was given, throw cmd_error on `uo_out[5]` high requiring a reset to clear  |
+|load `ll_byte`              |0xC0     | load bits 7-0 of the instruction word                                                    |
+|load `lh_byte`              |0xC1     | load bits 15-8 of the instruction word                                                   |
+|load `hl_byte`              |0xC2     | load bits 23-16 of the instruction word                                                  |
+|load `hh_byte`              |0xC3     | load bits 31-24 of the instruction word                                                  |
+|load `imem_addr`            |0xC4     | load what 3-bit address you want to write the previously built instruction word to       |
+|write to `imem[imem_addr]`  |0xC5     | write built instruction to address loaded into imem_addr                                 |
+|exit boot mode              |0xC6     | enter echo mode, echoing back any byte given afterwards                                  |
+|re-enter boot mode          |0xC7     | re-enter boot mode, holding cpu in reset                                                 |
+|command error               |default  | invalid command was given, throw cmd_error on `uo_out[5]` high requiring a reset to clear|
 
-*The spi commands require 2-bytes per command, even if the command doesnt use the second byte
-**The current mode can be observed on `uo_out[4]`. Mode is low when in boot and high when in echo
+*The spi commands require 2-bytes per command, even if the command doesnt use the second byte\n
+**The current mode can be observed on `uo_out[4]`. Mode is low when in boot and high when in echo\n
 
 Toggle `CS` high then low after power on. Program the cou through spi by following a cmd,data,cmd,data cadence loading all the bytes of the instruction word, loading the address to write to, then writing to imem until you write finish writing your program to instruction memory. Send the exit boot command to release the cpu and observe the results.
 
-Here is an example (in verilog syntax) of a buffer used to program the instruction word  `addi x10, x0, 45` into address 5 then echo 0xaa
+Here is an example (in verilog syntax) of a buffer used to program the instruction word  `addi x10, x0, 45` into address 5 then echo 0xAA
 
-`buff[14*8] = {8'hc0, 8'h13, 8'hc1, 8'h05, 8'hc2, 8'hd0, 8'hc3, 8'h02, 8'hc4, 8'h05, 8'hc5, 8'hxx, 8'hc6, 8'haa}`
+`buff[14*8] = {8'hc0,   8'h13, 8'hc1,   8'h05, 8'hc2,   8'hd0, 8'hc3,   8'h02, 8'hc4,     8'h05,                 8'hc5,     8'hxx,     8'hc6,     8'haa}`
+`buff[14*8] = { load, ll_byte,  load, lh_byte,  load, hl_byte,  load, hh_byte,  load, imem_addr, write imem[imem_addr], dont care, exit boot, echo data}` in english
 
-Which follows `buff[14*8] = {load, ll_byte, load, lh_byte, load, hl_byte, load, hh_byte, load, imem_addr, write imem[imem_addr], dont care, exit boot, echo data}` and is transmitted MSB of the buffer first
+Transmitted MSB of the buffer first
+
+
 
 ## External hardware
 
