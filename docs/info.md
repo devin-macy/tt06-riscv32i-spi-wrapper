@@ -41,10 +41,17 @@ Toggle `CS` high then low after power on. Program the cou through spi by followi
 
 Here is an example (in verilog syntax) of a buffer used to program the instruction word  `addi x10, x0, 45` into address 5 then echo 0xAA
 
-`buff[14*8] = {8'hc0,   8'h13, 8'hc1,   8'h05, 8'hc2,   8'hd0, 8'hc3,   8'h02, 8'hc4,     8'h05,                 8'hc5,     8'hxx,     8'hc6,     8'haa}`
-`buff[14*8] = { load, ll_byte,  load, lh_byte,  load, hl_byte,  load, hh_byte,  load, imem_addr, write imem[imem_addr], dont care, exit boot, echo data}` in english
+```
+buff[14*8] = {8'hc0, 8'h13, 8'hc1, 8'h05, 8'hc2, 8'hd0, 8'hc3, 8'h02, 
+              8'hc4, 8'h05, 8'hc5, 8'hxx, 8'hc6, 8'haa}
+```
+Which in words is
+```
+buff[14*8] = {load, ll_byte, load, lh_byte, load, hl_byte, load, hh_byte,
+              load, imem_addr, write imem[imem_addr], dont care, exit boot, echo data}
+```
 
-Transmitted MSB of the buffer first
+And transmitted MSB of the buffer first
 
 
 
