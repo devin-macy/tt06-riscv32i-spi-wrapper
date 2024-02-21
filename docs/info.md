@@ -15,9 +15,12 @@ For programmability, a spi wrapper has been added that starts in boot mode, requ
 
 In its current state, there is no way to observe the status of the cpu not in simulation, since the spi doesn't hand over control of itself to the cpu to output data. However the passed/failed signals on `uo_out[6]` and `uo_out[7]` respectively, check to see if register 10 is equal to 45. Which you can upload a simple program that adds numbers from 1-10 and stores them into register 10 to test functionality.
 
-This project was developed 
-
 ### Impact
+
+This project was developed in part with the Microelectronics Security Training Center (MEST) through the class ["ChipCraft: The Art of Chip Design for Non-Experts"](https://github.com/efabless/chipcraft---mest-course) deveoped and taught by Efabless and Redwood EDA. During the class, you learn concepts of microelectronics design
+by designing a calculator before moving to designing a 5-stage riscv32i cpu using [Makerchip](https://www.makerchip.com/) and [TL-Verilog](https://www.redwoodeda.com/tl-verilog). 
+TL-Verilog is a state-of-the-art HDL language that allows digital designers to write HDL the way they conceptualy think about a problem, instead of figuring out a problem
+according to the language.
 
 
 
