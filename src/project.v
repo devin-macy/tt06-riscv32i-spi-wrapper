@@ -23,7 +23,7 @@ module top(input logic clk, input logic reset, input logic [31:0] cyc_cnt, outpu
    logic rst_n = ! reset;
 
    // Instantiate the Tiny Tapeout module.
-   tt_um_riscv_spi_wrapper tt(.*);
+   m5_user_module_name tt(.*);
 
    // Passed/failed to control Makerchip simulation, passed from Tiny Tapeout module's uo_out pins.
    //assign passed = uo_out[6];
@@ -32,60 +32,116 @@ endmodule
 
 
 // Provide a wrapper module to debounce input signals if requested.
+// // The Tiny Tapeout top-level module.
+// This simply debounces and synchronizes inputs.
+// Debouncing is based on a counter. A change to any input will only be recognized once ALL inputs
+// are stable for a certain duration. This approach uses a single counter vs. a counter for each
+// bit.
+module tt_um_riscv_spi_wrapper (
+    input  wire [7:0] ui_in,    // Dedicated inputs - connected to the input switches
+    output wire [7:0] uo_out,   // Dedicated outputs - connected to the 7 segment display
+       // The FPGA is based on TinyTapeout 3 which has no bidirectional I/Os (vs. TT6 for the ASIC).
+    input  wire [7:0] uio_in,   // IOs: Bidirectional Input path
+    output wire [7:0] uio_out,  // IOs: Bidirectional Output path
+    output wire [7:0] uio_oe,   // IOs: Bidirectional Enable path (active high: 0=input, 1=output)
+    
+    input  wire       ena,      // will go high when the design is enabled
+    input  wire       clk,      // clock
+    input  wire       rst_n     // reset_n - low to reset
+);
+    
+    // Synchronize.
+    logic [17:0] inputs_ff, inputs_sync;
+    always @(posedge clk) begin
+        inputs_ff <= {ui_in, uio_in, ena, rst_n};
+        inputs_sync <= inputs_ff;
+    end
 
+    // Debounce.
+    `define DEBOUNCE_MAX_CNT 14'h3fff
+    logic [17:0] inputs_candidate, inputs_captured;
+    logic sync_rst_n = inputs_sync[0];
+    logic [13:0] cnt;
+    always @(posedge clk) begin
+        if (!sync_rst_n)
+           cnt <= `DEBOUNCE_MAX_CNT;
+        else if (inputs_sync != inputs_candidate) begin
+           // Inputs changed before stablizing.
+           cnt <= `DEBOUNCE_MAX_CNT;
+           inputs_candidate <= inputs_sync;
+        end
+        else if (cnt > 0)
+           cnt <= cnt - 14'b1;
+        else begin
+           // Cnt == 0. Capture candidate inputs.
+           inputs_captured <= inputs_candidate;
+        end
+    end
+    logic [7:0] clean_ui_in, clean_uio_in;
+    logic clean_ena, clean_rst_n;
+    assign {clean_ui_in, clean_uio_in, clean_ena, clean_rst_n} = inputs_captured;
+
+    my_design my_design (
+        .ui_in(clean_ui_in),
+        .uio_in(clean_uio_in),
+        .ena(clean_ena),
+        .rst_n(clean_rst_n),
+        .*);
+endmodule
 //_\SV
 
 //_\SV
-module SPI_Peripheral
+module spi_wrapper
 (
   // Control/Data Signals
-  input wire clk,                       // System clock
-  input wire rst_n,                     // Active-low reset
+  input wire clk,                       // system clock
+  input wire rst_n,                     // active-low reset
 
   // CSR
+  output reg [7:0] rx_buff,             // MOSI buffer - populates when SPI recieves a full byte
+  output reg rx_valid,                  // pulsed if successfully recieved a full byte
+  input wire [7:0] tx_buff,             // MISO buffer - pulled into r_tx_buff when tx_valid is set high by the CPU (NOT IMPLEMENTED)
+  input reg tx_valid,                   // pulsed if ready to transmit data (NOT IMPLEMENTED)
   output reg mode,                      // 0 if boot, 1 if echo
-  output reg [7:0] rx_buff,             // MOSI buffer
-  output reg rx_valid,                  // pulsed if successfully rx data
-  input wire [7:0] tx_buff,             // MISO buffer
-  input reg tx_valid,                   // pulsed if ready to tx
+  output reg cmd_error,                 // asserts when an invalid cmd is given, must reset to clear
 
   // CPU program signals
-  output wire cpu_rst_n,                // Hold CPU In Reset On Boot
-  output reg cmd_error,                 // Asserts when an invalid cmd is given, must reset to clear
-  output reg imem_wr_en,                // Write enable for imem
-  output reg [31:0] prog_instr,         // Instr to write to imem
-  output reg [3:0] prog_addr,           // Address to write select imem
+  output wire cpu_rst_n,                // hold CPU in reset when programming in boot mode
+  output reg imem_wr_en,                // write enable for instruction memory
+  output reg [31:0] prog_instr,         // instruction used to write to memory
+  output reg [3:0] prog_addr,           // address used to write to memory
 
   // SPI Interface
   input wire sclk,                      // SPI clock
-  input wire cs,                        // Chip Select (active-low)
-  input wire mosi,                      // Master-Out-Slave-In
-  output reg miso                       // Master-In-Slave-Out
-
+  input wire cs,                        // chip select (active-low)
+  input wire mosi,                      // SPI recieve data
+  output wire miso                      // SPI transmit data
 );
 
   reg [2:0] rx_bit_count;
-  reg [7:0] r_rx_buff;              // hold value
-  reg [7:0] r_rx_buff_temp;         // working register
-  reg rx1_done, rx2_done, rx3_done; // clock domain crossing signals
+  reg [7:0] r_rx_buff;
+  reg [7:0] r_rx_buff_temp;
+  reg rx1_done, rx2_done, rx3_done;    // clock domain crossing signals
 
-  reg [7:0] rx_cmd;            // SPI command - load bytes, write to mem, echo
-  reg rx_grab_cmd_n;             // To alternate between recieving cmd and data (0 = cmd, 1 = data)
+  reg [7:0] rx_cmd;            		   // command recieved in the last byte
+  reg rx_grab_cmd_n;           		   // flip-flop between decoding command
+                                       // or operating on current data byte
 
   reg [2:0] tx_bit_count;
   reg [7:0] r_tx_buff;
-  reg response_valid;
+  reg response_valid;                  // echo mode internal tx start signal
   reg miso_bit;
   assign miso = miso_bit;
 
-  reg [7:0] hh_byte; // data word [31:24]
-  reg [7:0] hl_byte;  // data word [23:16]
-  reg [7:0] lh_byte;  // data word [15:8]
-  reg [7:0] ll_byte;   // data word [7:0]
-  reg [3:0] imem_address;        // Instr Mem Address
+  reg [7:0] hh_byte;                   // instruction [31:24]
+  reg [7:0] hl_byte;                   // instruction [23:16]
+  reg [7:0] lh_byte;                   // instruction [15:8]
+  reg [7:0] ll_byte;                   // instruction [7:0]
+  reg [3:0] imem_address;
+
 
   // rx spi and global cock domain crossing
-  // assert rx_valid for 1 cycle when rx_buff is valid
+  // assert rx_valid for 1 cycle when a full byte is recieved
   always @(posedge clk) begin
      if (~rst_n) begin // sync reset
         rx2_done <= 1'b0;
@@ -99,11 +155,11 @@ module SPI_Peripheral
         rx3_done <= rx2_done;
 
         if(rx3_done == 1'b0 && rx2_done == 1'b1) begin // rising edge
-           // done recieving, set rx data valid
+           // done recieving, set rx data valid and load output buffer
            rx_valid <= 1'b1;
            rx_buff <= r_rx_buff;
         end else begin
-           // clear rx data valid
+           // clear rx data valid, rx_buff persists
            rx_valid <= 1'b0;
         end
      end
@@ -111,24 +167,24 @@ module SPI_Peripheral
 
   // receive mosi bits from spi clk
   always @(posedge sclk) begin
-	  if (cs) begin
+	  if (cs) begin // hold in reset when not selected
         rx_bit_count <= 3'b0;
         rx1_done <= 1'b0;
      end else begin
-        rx_bit_count <= rx_bit_count + 1;    // increment bit count
-        r_rx_buff_temp <= {r_rx_buff_temp[6:0], mosi}; // shift in bits MSB first to working buff
+        rx_bit_count <= rx_bit_count + 1;              // increment bit count
+        r_rx_buff_temp <= {r_rx_buff_temp[6:0], mosi}; // shift in bits MSB first to temp buffer
 
         if (rx_bit_count == 3'b111) begin
-           rx1_done <= 1'b1;
-           r_rx_buff <= {r_rx_buff_temp[6:0], mosi}; // shift in last bit to staging buff
-        end else if(rx_bit_count == 3'b010) begin // de-assert when recieving next byte
+           rx1_done <= 1'b1;                           // signal recieved full byte
+           r_rx_buff <= {r_rx_buff_temp[6:0], mosi};   // shift in last bit to temp buffer
+        end else if(rx_bit_count == 3'b010) begin      // de-assert when starting to recieve next byte
            rx1_done <= 1'b0;
         end
      end
   end
 
   // register tx byte when tx_valid pulse comes, initiating transfer
-  // not implemented - driving signals tied to ground
+  // NOT IMPLEMENTED - driving signals tied to ground and caused multiple driver errors on r_tx_buff
   /*
   always @(posedge clk) begin
      if(~rst_n) begin
@@ -144,7 +200,7 @@ module SPI_Peripheral
   // clock out tx byte when there is a tx byte (echo)
   always @(posedge sclk) begin
      if (cs) begin
-        tx_bit_count <= 3'b111; // send MSB first
+        tx_bit_count <= 3'b111;   // send MSB first
         miso_bit <= r_tx_buff[7]; // reset to MSB
      end else begin
         // with 2 modes - only able to tx if in echo mode
@@ -160,34 +216,35 @@ module SPI_Peripheral
 
   // internal spi commands
   always @(posedge clk) begin
-     if (~rst_n) begin
-        mode <= 1'b0;
+     if (~rst_n) begin // sync reset
+
         cpu_rst_n <= 1'b0;
-        imem_wr_en <= 1'b0;
+        mode <= 1'b0;
         cmd_error <= 1'b0;
-        prog_addr <= 4'b0000;
-        prog_instr <= 32'h00_00_00_00;
 
         hh_byte <= 8'h00;
         hl_byte <= 8'h00;
         lh_byte <= 8'h00;
         ll_byte <= 8'h00;
+        prog_instr <= 32'h00_00_00_00;
+
+        imem_wr_en <= 1'b0;
         imem_address <= 4'h0;
+        prog_addr <= 4'h0;
 
         rx_grab_cmd_n <= 1'b0;
         rx_cmd <= 8'h00;
 
         response_valid <= 1'b0;
         r_tx_buff <= 8'h00;
-
-     end else if (rx3_done == 1'b0 && rx2_done == 1'b1) begin // if rx buff is full - rising edge
+     end else if (rx3_done == 1'b0 && rx2_done == 1'b1) begin // if recieved a full byte - rising-edge
         if (~mode) begin // boot mode
-           cpu_rst_n <= 1'b0; // assert cpu reset when in boot mode
-           if (~rx_grab_cmd_n) begin // recieved cmd
+           cpu_rst_n <= 1'b0;                                 // assert cpu reset when in boot mode
+           if (~rx_grab_cmd_n) begin // command
               rx_cmd <= r_rx_buff;
-              rx_grab_cmd_n <= 1'b1; // next byte is data
-           end else if(rx_grab_cmd_n) begin // recieved data
-              case (rx_cmd)
+              rx_grab_cmd_n <= 1'b1;                          // next byte is data
+           end else if(rx_grab_cmd_n) begin // data
+              case (rx_cmd)                                   // decode last command and operate on current byte
                 8'hc0 : begin
                          ll_byte <= r_rx_buff;
                         end
@@ -209,31 +266,31 @@ module SPI_Peripheral
                          imem_wr_en <= 1'b1;
                         end
                 8'hc6 : begin
-                         mode <= 1'b1; // enter echo mode
+                         mode <= 1'b1;                        // enter echo mode
                         end
                 8'hc7 : begin
-                         mode <= 1'b0;
+                         mode <= 1'b0;                        // do nothing
                          end
                 default: begin
-                         cmd_error <= 1'b1; // invalid cmd, must reset to clear
+                         cmd_error <= 1'b1;                   // invalid cmd, must reset to clear
                          end
                endcase
-               rx_grab_cmd_n <= 1'b0; // next byte is a cmd
+               rx_grab_cmd_n <= 1'b0;                         // next byte is a cmd
            end // end rx_grab_cmd_n
         end else begin // echo mode
-           cpu_rst_n <= 1'b1; // de-assert cpu reset when not in boot
-           r_tx_buff <= r_rx_buff;
+           cpu_rst_n <= 1'b1;                                 // de-assert cpu reset when not in boot
+           r_tx_buff <= r_rx_buff;                            // load TRANSMIT buffer with RECIEVED buffer
            response_valid <= 1'b1;
-           if(r_rx_buff == 8'hc7) begin // re-enter boot if cmd = 8'hc7
+           if(r_rx_buff == 8'hc7) begin                       // re-enter boot if in echo mode and cmd is recieved
               mode <= 1'b0;
            end
         end // end mode
-     end else if(tx_bit_count == 3'b0) begin // de-assert response_valid after tx complete
-        response_valid <= 1'b0;
+     end else if(tx_bit_count == 3'b0) begin                  // de-assert response_valid after tx complete
+        response_valid <= 1'b0;                               // (can probably move up into echo mode case)
      end else begin
-        imem_wr_en <= 1'b0; // de-assert write enable on cmd
-     end
-  end
+        imem_wr_en <= 1'b0;                                   // de-assert write enable on cmd (only happens when doing nothing in boot mode)
+     end // end byte recieved
+  end // end spi internal command
 
 endmodule
 
@@ -245,14 +302,14 @@ endmodule
 // The Tiny Tapeout module
 // =======================
 
-module tt_um_riscv_spi_wrapper (
+module m5_user_module_name (
     input  wire [7:0] ui_in,    // Dedicated inputs - connected to the input switches
     output wire [7:0] uo_out,   // Dedicated outputs - connected to the 7 segment display
-       // The FPGA is based on TinyTapeout 3 which has no bidirectional I/Os (vs. TT6 for the ASIC).
+    //   // The FPGA is based on TinyTapeout 3 which has no bidirectional I/Os (vs. TT6 for the ASIC).
     input  wire [7:0] uio_in,   // IOs: Bidirectional Input path
     output wire [7:0] uio_out,  // IOs: Bidirectional Output path
     output wire [7:0] uio_oe,   // IOs: Bidirectional Enable path (active high: 0=input, 1=output)
-    
+    //
     input  wire       ena,      // will go high when the design is enabled
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
@@ -260,26 +317,27 @@ module tt_um_riscv_spi_wrapper (
    logic passed, failed;
    assign uo_out[7:6] = {failed, passed};
 
-   logic [31:0] spi_csr; // [31:18] - unused
-                         // [17] [16:9] - tx_valid + tx_buff
-                         // [8] [7:0] - rx_valid + rx_buff
-
+   // [31:18] - unused
+   // [17] [16:9] - tx_valid + tx_buff (NOT IMPLEMENTED)
+   // [8] [7:0] - rx_valid + rx_buff
+   logic [31:0] spi_csr;
    logic [31:0] spi_prog_instr;
    logic [3:0] spi_prog_addr;
    logic spi_imem_wr_en;
    logic spi_cpu_rst_n;
 
+   // resets
    logic spi_cpu_rst = ! spi_cpu_rst_n;
    wire reset = ! rst_n;
 
-   assign uio_oe = 8'b1;
-   assign uio_out = 8'b1;
+   // unused signals
+   assign uio_oe = 8'b0;
+   assign uio_out = 8'b0;
    assign uo_out[2:0] = 3'b0;
-   //assign uo_out[7:6] = 2'b0;
    assign spi_csr[31:18] = 14'b0;
    assign spi_csr[17:9] = 9'b0;
 
-   SPI_Peripheral spi (
+   spi_wrapper spi (
 		.clk(clk),
       .rst_n(rst_n),
 
@@ -315,7 +373,7 @@ module tt_um_riscv_spi_wrapper (
 `define BOGUS_USE(ignore)
 
 
-genvar digit, dmem, imem, input_label, leds, switch, xreg;
+genvar digit, dmem, imem, leds, switch, xreg;
 
 
 //
@@ -974,7 +1032,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
 
 
 
-/*------------------------------------------------------------------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------------------------------------------------------------------------
 //
 // Debug Signals
 //
@@ -1238,20 +1296,22 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
 
 
    end
------------------------------------------------------------------------------------------------------------------------------------------------------*/
+------------------------------------------------------------------------------------------------------------------------------------------*/
 // ---------- Generated Code Ends ----------
 //_\TLV
    /* verilator lint_off UNOPTFLAT */
    // Connect Tiny Tapeout I/Os to Virtual FPGA Lab.
-   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/35e36bd144fddd75495d4cbc01c4fc50ac5bde6f/tlvlib/tinytapeoutlib.tlv 76   // Instantiated from top.tlv, 598 as: m5+tt_connections()
+   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/35e36bd144fddd75495d4cbc01c4fc50ac5bde6f/tlvlib/tinytapeoutlib.tlv 76   // Instantiated from top.tlv, 601 as: m5+tt_connections()
+   /*-------------------------------------------------------   
       assign L0_slideswitch_a0[7:0] = ui_in;
       assign L0_sseg_segment_n_a0[6:0] = ~ uo_out[6:0];
       assign L0_sseg_decimal_point_n_a0 = ~ uo_out[7];
       assign L0_sseg_digit_n_a0[7:0] = 8'b11111110;
+   ----------------------------------------------------------*/
    //_\end_source
 
    // Instantiate the Virtual FPGA Lab.
-   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv 307   // Instantiated from top.tlv, 601 as: m5+board(/top, /fpga, 7, $, , cpu)
+   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv 307   // Instantiated from top.tlv, 604 as: m5+board(/top, /fpga, 7, $, , cpu)
       
       //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv 355   // Instantiated from /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv, 309 as: m4+thanks(m5__l(309)m5_eval(m5_get(BOARD_THANKS_ARGS)))
          //_/thanks
@@ -1499,8 +1559,8 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
             
                // Connect Tiny Tapeout outputs. Note that uio_ outputs are not available in the Tiny-Tapeout-3-based FPGA boards.
                //*uo_out = {6'b0, *failed, *passed};
-               assign uio_out = 8'b0;
-               assign uio_oe = 8'b0;
+               //*uio_out = 8'b0;
+               //*uio_oe = 8'b0;
             
                // Macro instantiations to be uncommented when instructed for:
                //  o instruction memory
@@ -1553,7 +1613,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
    
       // LEDs.
       
-   
+      /*-----------------------------------------------------------------------------------------------------------
       // 7-Segment
       //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv 395   // Instantiated from /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv, 346 as: m4+fpga_sseg.
          for (digit = 0; digit <= 0; digit++) begin : L1_Digit //_/digit
@@ -1582,14 +1642,11 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
       //_\end_source
    
       // pushbuttons
+      ------------------------------------------------------------------------------------------------------*/
       
    //_\end_source
    // Label the switch inputs [0..7] (1..8 on the physical switch panel) (top-to-bottom).
-   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/35e36bd144fddd75495d4cbc01c4fc50ac5bde6f/tlvlib/tinytapeoutlib.tlv 82   // Instantiated from top.tlv, 603 as: m5+tt_input_labels_viz(⌈"UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED"⌉)
-      for (input_label = 0; input_label <= 7; input_label++) begin : L1_InputLabel //_/input_label
-         
-      end
-   //_\end_source
+   //m5+tt_input_labels_viz("UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED")
 
 //_\SV
 endmodule
