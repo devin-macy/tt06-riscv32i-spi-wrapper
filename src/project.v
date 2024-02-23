@@ -14,21 +14,21 @@
 // Modify the module contents to your needs.
 // ================================================
 
-module top(input logic clk, input logic reset, input logic [31:0] cyc_cnt, output logic passed, output logic failed);
-   // Tiny tapeout I/O signals.
-   logic [7:0] ui_in, uo_out;
-   logic [7:0] uio_in,  uio_out, uio_oe;
-   assign uio_in = 8'b0;
-   logic ena = 1'b0;
-   logic rst_n = ! reset;
+// module top(input logic clk, input logic reset, input logic [31:0] cyc_cnt, output logic passed, output logic failed);
+//    // Tiny tapeout I/O signals.
+//    logic [7:0] ui_in, uo_out;
+//    logic [7:0] uio_in,  uio_out, uio_oe;
+//    assign uio_in = 8'b0;
+//    logic ena = 1'b0;
+//    logic rst_n = ! reset;
 
-   // Instantiate the Tiny Tapeout module.
-   tt_um_riscv_spi_wrapper tt(.*);
+//    // Instantiate the Tiny Tapeout module.
+//    tt_um_riscv_spi_wrapper tt(.*);
 
-   // Passed/failed to control Makerchip simulation, passed from Tiny Tapeout module's uo_out pins.
-   //assign passed = uo_out[6];
-   //assign failed = uo_out[7];
-endmodule
+//    // Passed/failed to control Makerchip simulation, passed from Tiny Tapeout module's uo_out pins.
+//    //assign passed = uo_out[6];
+//    //assign failed = uo_out[7];
+// endmodule
 
 
 // Provide a wrapper module to debounce input signals if requested.
