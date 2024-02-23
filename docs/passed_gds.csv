@@ -1,2 +1,4 @@
-Commit, Tiles, Utilization, Time for GDS, Linter Warnings, Synth Warnings
-820074d, 4x2, 70.19, 1h 25m, 15, 4
+Commit, Tiles, Utilization, Time for GDS, Linter Warnings, Synth Warnings, Comments
+820074d, 4x2, 70.19, 1h 25m, 15, 4, first passing gds files
+36d47ee, 4x2, N/A, 34m 33s, 15, 0, tried commenting out some makerchip macro's for the fpga lab but didn't work previously. reverted changes and removed debounce wrapper
+d7eb6df, 4x2, N/A, 39m 31s, 21, 0, removed some makerchip fpga vizualization signals. since the previous commit, the utilization percentage stopped showing up after completion
