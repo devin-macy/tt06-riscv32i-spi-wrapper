@@ -26,20 +26,28 @@ demo board before moving to designing a 5-stage riscv32i cpu using [Makerchip](h
 ## How to test
 
 Have prepared a riscv32i binary of up to 16 instructions [here is a pretty good rescource for putting together binaries](https://riscvasm.lucasteske.dev/)
+The cpu has 3 control and status registers (csr's) in data memory, taking up the first 3 entries and giving the user 5 words to work with. 
+
+|data memory|csr usage|
+|:---------:|---------|
+|`dmem[0]`  |32-bit cycle counter                                                                                                |
+|`dmem[1]`  |spi wrapper csr - bits 7-0 is the last byte recieved and bit 8 is a recieved byte valid signal. the rest are unused |
+|`dmem[2]`  |the last 32-bit instruction written to instruction memory. populated when command 0xC5 is issued                    |
+
 
 Connect the spi signals `SCLK`, `CS`, `MOSI`, and `MISO` to their respective pins. The spi commands are as follows:
 
 |command|code|description|
-|-------|----|-----------|
-|load `ll_byte`              |0xC0     | load bits 7-0 of the instruction word                                                    |
-|load `lh_byte`              |0xC1     | load bits 15-8 of the instruction word                                                   |
-|load `hl_byte`              |0xC2     | load bits 23-16 of the instruction word                                                  |
-|load `hh_byte`              |0xC3     | load bits 31-24 of the instruction word                                                  |
-|load `imem_addr`            |0xC4     | load what 3-bit address you want to write the previously built instruction word to       |
-|write to `imem[imem_addr]`  |0xC5     | write built instruction to address loaded into imem_addr                                 |
-|exit boot mode              |0xC6     | enter echo mode, echoing back any byte given afterwards                                  |
-|re-enter boot mode          |0xC7     | re-enter boot mode, holding cpu in reset                                                 |
-|command error               |default  | invalid command was given, throw cmd_error on `uo_out[5]` high requiring a reset to clear|
+|-------|:--:|-----------|
+|load `ll_byte`              |0xC0     | load bits 7-0 of the instruction word                                                     |
+|load `lh_byte`              |0xC1     | load bits 15-8 of the instruction word                                                    |
+|load `hl_byte`              |0xC2     | load bits 23-16 of the instruction word                                                   |
+|load `hh_byte`              |0xC3     | load bits 31-24 of the instruction word                                                   |
+|load `imem_addr`            |0xC4     | load what 3-bit address you want to write the previously built instruction word to        |
+|write to `imem[imem_addr]`  |0xC5     | write built instruction to address loaded into imem_addr                                  |
+|exit boot mode              |0xC6     | enter echo mode, echoing back any byte given afterwards                                   |
+|re-enter boot mode          |0xC7     | re-enter boot mode, holding cpu in reset                                                  |
+|command error               |default  | invalid command was given, throw cmd_error on `uo_out[5]` high requiring a reset to clear |
 
 *The spi commands require 2-bytes per command, even if the command doesnt use the second byte
 
