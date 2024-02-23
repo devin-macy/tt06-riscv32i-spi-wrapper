@@ -373,7 +373,7 @@ module m5_user_module_name (
 `define BOGUS_USE(ignore)
 
 
-genvar digit, dmem, imem, leds, switch, xreg;
+genvar digit, dmem, imem, input_label, leds, switch, xreg;
 
 
 //
@@ -1032,7 +1032,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
 
 
 
-/*------------------------------------------------------------------------------------------------------------------------------------------------
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------
 //
 // Debug Signals
 //
@@ -1296,18 +1296,16 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
 
 
    end
-------------------------------------------------------------------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------------------------------------------------------------------------*/
 // ---------- Generated Code Ends ----------
 //_\TLV
    /* verilator lint_off UNOPTFLAT */
    // Connect Tiny Tapeout I/Os to Virtual FPGA Lab.
    //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/35e36bd144fddd75495d4cbc01c4fc50ac5bde6f/tlvlib/tinytapeoutlib.tlv 76   // Instantiated from top.tlv, 601 as: m5+tt_connections()
-   /*-------------------------------------------------------   
       assign L0_slideswitch_a0[7:0] = ui_in;
       assign L0_sseg_segment_n_a0[6:0] = ~ uo_out[6:0];
       assign L0_sseg_decimal_point_n_a0 = ~ uo_out[7];
       assign L0_sseg_digit_n_a0[7:0] = 8'b11111110;
-   ----------------------------------------------------------*/
    //_\end_source
 
    // Instantiate the Virtual FPGA Lab.
@@ -1613,7 +1611,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
    
       // LEDs.
       
-      /*-----------------------------------------------------------------------------------------------------------
+/*-------------------------------------------------------------------
       // 7-Segment
       //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv 395   // Instantiated from /raw.githubusercontent.com/osfpga/VirtualFPGALab/a069f1e4e19adc829b53237b3e0b5d6763dc3194/tlvlib/fpgaincludes.tlv, 346 as: m4+fpga_sseg.
          for (digit = 0; digit <= 0; digit++) begin : L1_Digit //_/digit
@@ -1642,12 +1640,15 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
       //_\end_source
    
       // pushbuttons
-      ------------------------------------------------------------------------------------------------------*/
       
    //_\end_source
    // Label the switch inputs [0..7] (1..8 on the physical switch panel) (top-to-bottom).
-   //m5+tt_input_labels_viz("UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED")
-
+   //_\source /raw.githubusercontent.com/osfpga/VirtualFPGALab/35e36bd144fddd75495d4cbc01c4fc50ac5bde6f/tlvlib/tinytapeoutlib.tlv 82   // Instantiated from top.tlv, 606 as: m5+tt_input_labels_viz(⌈"UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED", "UNUSED"⌉)
+      for (input_label = 0; input_label <= 7; input_label++) begin : L1_InputLabel //_/input_label
+         
+      end
+   //_\end_source
+---------------------------------------------------------------------*/
 //_\SV
 endmodule
 
