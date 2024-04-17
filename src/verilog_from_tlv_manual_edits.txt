@@ -6,3 +6,10 @@
 
 3. Comment out the all of the assign statement for slidswitch, sseg etc. immediatly after the "Generated Code Ends"
     - these are used on the TT FPGA demo board to connect the 7-segment and slide switch signals
+
+4. Comment out the 'top' module
+    - 'top' is needed in makerchip and is the test bench generator. makerchip will yell at you if you try
+       and remove it in source TL-V. This should clear up some linter warnings
+
+5. Change IMEM initilization from address # to all 0's
+    - initial it initilizes everything to the respective address number for debugging but need to change it to all 0's

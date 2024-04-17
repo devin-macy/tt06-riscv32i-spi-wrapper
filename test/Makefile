@@ -32,11 +32,38 @@ VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
 endif
 
 # Include the testbench sources:
-VERILOG_SOURCES += $(PWD)/tb.v 
+VERILOG_SOURCES += $(PWD)/tb.v
 TOPLEVEL = tb
 
 # MODULE is the basename of the Python test file
 MODULE = test
 
 # include cocotb's make rules to take care of the simulator setup
-include $(shell cocotb-config --makefiles)/Makefile.sim
+# include $(shell cocotb-config --makefiles)/Makefile.sim
+
+# --------------------------------------------------------------------------------------------------
+
+SRC = ../src/*.sv
+
+TOP = tb_spi_wrapper
+TEST_SRC = ./tb_spi_wrapper.sv
+
+BIN = $(TOP).vvp
+WAVE = $(TOP).vcd
+
+$(BIN): $(SRC) $(TEST_SRC)
+	iverilog $(SRC) $(TEST_SRC) -o $(BIN) -s $(TOP) -g2012
+
+.PHONY: all clean test
+
+all: $(BIN)
+
+test: $(BIN)
+	vvp $(BIN)
+
+view: $(BIN)
+	vvp $(BIN)
+	gtkwave $(WAVE)
+
+clean:
+	rm -f *.vvp *.vcd *.out

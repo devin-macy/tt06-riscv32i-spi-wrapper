@@ -2,6 +2,8 @@
 .idea
 .vscode
 *.vcd
+*.vvp
+*.bin
 runs
 tt_submission
 src/user_config.tcl

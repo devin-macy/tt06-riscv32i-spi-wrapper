@@ -13,7 +13,7 @@ module spi_wrapper
   output reg cmd_error,                 // asserts when an invalid cmd is given, must reset to clear
   
   // CPU program signals
-  output wire cpu_rst_n,                // hold CPU in reset when programming in boot mode
+  output reg cpu_rst_n,                // hold CPU in reset when programming in boot mode
   output reg imem_wr_en,                // write enable for instruction memory
   output reg [31:0] prog_instr,         // instruction used to write to memory
   output reg [3:0] prog_addr,           // address used to write to memory
@@ -71,9 +71,8 @@ module spi_wrapper
         end
      end
   end
-  
   // receive mosi bits from spi clk
-  always @(posedge sclk) begin
+  always @(posedge sclk, posedge cs) begin
 	  if (cs) begin // hold in reset when not selected
         rx_bit_count <= 3'b0;
         rx1_done <= 1'b0;
@@ -105,7 +104,7 @@ module spi_wrapper
   */
   
   // clock out tx byte when there is a tx byte (echo)
-  always @(posedge sclk) begin
+  always @(posedge sclk, posedge cs) begin
      if (cs) begin
         tx_bit_count <= 3'b111;   // send MSB first
         miso_bit <= r_tx_buff[7]; // reset to MSB
