@@ -39,50 +39,50 @@ endmodule
 module spi_wrapper
 (
   // Control/Data Signals
-  input wire clk,                       // system clock
-  input wire rst_n,                     // active-low reset
+  input logic clk,                       // system clock
+  input logic rst_n,                     // active-low reset
 
   // CSR
-  output reg [7:0] rx_buff,             // MOSI buffer - populates when SPI recieves a full byte
-  output reg rx_valid,                  // pulsed if successfully recieved a full byte
-  input wire [7:0] tx_buff,             // MISO buffer - pulled into r_tx_buff when tx_valid is set high by the CPU (NOT IMPLEMENTED)
-  input reg tx_valid,                   // pulsed if ready to transmit data (NOT IMPLEMENTED)
-  output reg mode,                      // 0 if boot, 1 if echo
-  output reg cmd_error,                 // asserts when an invalid cmd is given, must reset to clear
+  output logic [7:0] rx_buff,             // MOSI buffer - populates when SPI recieves a full byte
+  output logic rx_valid,                  // pulsed if successfully recieved a full byte
+  input logic [7:0] tx_buff,             // MISO buffer - pulled into r_tx_buff when tx_valid is set high by the CPU (NOT IMPLEMENTED)
+  input logic tx_valid,                   // pulsed if ready to transmit data (NOT IMPLEMENTED)
+  output logic mode,                      // 0 if boot, 1 if echo
+  output logic cmd_error,                 // asserts when an invalid cmd is given, must reset to clear
 
   // CPU program signals
-  output reg cpu_rst_n,                // hold CPU in reset when programming in boot mode
-  output reg imem_wr_en,                // write enable for instruction memory
-  output reg [31:0] prog_instr,         // instruction used to write to memory
-  output reg [3:0] prog_addr,           // address used to write to memory
+  output logic cpu_rst_n,                // hold CPU in reset when programming in boot mode
+  output logic imem_wr_en,                // write enable for instruction memory
+  output logic [31:0] prog_instr,         // instruction used to write to memory
+  output logic [3:0] prog_addr,           // address used to write to memory
 
   // SPI Interface
-  input wire sclk,                      // SPI clock
-  input wire cs,                        // chip select (active-low)
-  input wire mosi,                      // SPI recieve data
-  output wire miso                      // SPI transmit data
+  input logic sclk,                      // SPI clock
+  input logic cs,                        // chip select (active-low)
+  input logic mosi,                      // SPI recieve data
+  output logic miso                      // SPI transmit data
 );
 
-  reg [2:0] rx_bit_count;
-  reg [7:0] r_rx_buff;
-  reg [7:0] r_rx_buff_temp;
-  reg rx1_done, rx2_done, rx3_done;    // clock domain crossing signals
+  logic [2:0] rx_bit_count;
+  logic [7:0] r_rx_buff;
+  logic [7:0] r_rx_buff_temp;
+  logic rx1_done, rx2_done, rx3_done;    // clock domain crossing signals
 
-  reg [7:0] rx_cmd;            		   // command recieved in the last byte
-  reg rx_grab_cmd_n;           		   // flip-flop between decoding command
+  logic [7:0] rx_cmd;            		   // command recieved in the last byte
+  logic rx_grab_cmd_n;           		   // flip-flop between decoding command
                                        // or operating on current data byte
 
-  reg [2:0] tx_bit_count;
-  reg [7:0] r_tx_buff;
-  reg response_valid;                  // echo mode internal tx start signal
-  reg miso_bit;
+  logic [2:0] tx_bit_count;
+  logic [7:0] r_tx_buff;
+  logic response_valid;                  // echo mode internal tx start signal
+  logic miso_bit;
   assign miso = miso_bit;
 
-  reg [7:0] hh_byte;                   // instruction [31:24]
-  reg [7:0] hl_byte;                   // instruction [23:16]
-  reg [7:0] lh_byte;                   // instruction [15:8]
-  reg [7:0] ll_byte;                   // instruction [7:0]
-  reg [3:0] imem_address;
+  logic [7:0] hh_byte;                   // instruction [31:24]
+  logic [7:0] hl_byte;                   // instruction [23:16]
+  logic [7:0] lh_byte;                   // instruction [15:8]
+  logic [7:0] ll_byte;                   // instruction [7:0]
+  logic [3:0] imem_address;
 
 
   // rx spi and global cock domain crossing
@@ -248,16 +248,16 @@ endmodule
 // =======================
 
 module tt_um_riscv_spi_wrapper (
-    input  wire [7:0] ui_in,    // Dedicated inputs - connected to the input switches
-    output wire [7:0] uo_out,   // Dedicated outputs - connected to the 7 segment display
+    input  logic [7:0] ui_in,    // Dedicated inputs - connected to the input switches
+    output logic [7:0] uo_out,   // Dedicated outputs - connected to the 7 segment display
     //   // The FPGA is based on TinyTapeout 3 which has no bidirectional I/Os (vs. TT6 for the ASIC).
-    input  wire [7:0] uio_in,   // IOs: Bidirectional Input path
-    output wire [7:0] uio_out,  // IOs: Bidirectional Output path
-    output wire [7:0] uio_oe,   // IOs: Bidirectional Enable path (active high: 0=input, 1=output)
+    input  logic [7:0] uio_in,   // IOs: Bidirectional Input path
+    output logic [7:0] uio_out,  // IOs: Bidirectional Output path
+    output logic [7:0] uio_oe,   // IOs: Bidirectional Enable path (active high: 0=input, 1=output)
     //
-    input  wire       ena,      // will go high when the design is enabled
-    input  wire       clk,      // clock
-    input  wire       rst_n     // reset_n - low to reset
+    input  logic       ena,      // will go high when the design is enabled
+    input  logic       clk,      // clock
+    input  logic       rst_n     // reset_n - low to reset
 );
    logic passed, failed;
    assign uo_out[7:6] = {failed, passed};
@@ -273,7 +273,7 @@ module tt_um_riscv_spi_wrapper (
 
    // resets
    logic spi_cpu_rst = ! spi_cpu_rst_n;
-   wire reset = ! rst_n;
+   logic reset = ! rst_n;
 
    // unused signals
    assign uio_oe = 8'b0;
@@ -1512,7 +1512,7 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
                //_|cpu
                   //m4+imem(@1)    // Args: (read stage)
                   //_\source /raw.githubusercontent.com/efabless/chipcraftmestcourse/main/tlvlib/riscvshelllib.tlv 33   // Instantiated from top.tlv, 292 as: m4+rf(@2, @3)
-                     // Reg File
+                     // logic File
                      //_@3
                         for (xreg = 0; xreg <= 15; xreg++) begin : L1_FpgaPins_Fpga_CPU_Xreg //_/xreg
 

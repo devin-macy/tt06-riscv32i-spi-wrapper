@@ -16,3 +16,6 @@
 
 6. Get rid of any use of `BOGUS_USE() from TL-V
     - macro isn't expanded sometimes for the ASIC flow from makerchip
+
+7. uio_out and uio_oe should only have one driver
+    - there are potential for a multiple driver mishap once code is generated fro TL-V because of the boiler plate FPGA wrapper
