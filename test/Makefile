@@ -51,6 +51,8 @@ TEST_SRC = ./tb_spi_wrapper.sv
 BIN = $(TOP).vvp
 WAVE = $(TOP).vcd
 
+nothing:
+
 $(BIN): $(SRC) $(TEST_SRC)
 	iverilog $(SRC) $(TEST_SRC) -o $(BIN) -s $(TOP) -g2012
 
