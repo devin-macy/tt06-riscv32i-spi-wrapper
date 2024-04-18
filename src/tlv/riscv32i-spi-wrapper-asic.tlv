@@ -71,7 +71,7 @@
       @1 
          /imem[15:0]
             $wr = |cpu$imem_wr_en && (|cpu$imem_addr[3:0] == #imem);
-            $value[31:0] = *reset ? #imem :
+            $value[31:0] = *reset ? 32'b0 :
                            $wr    ? |cpu$imem_wr_data :
                                     $RETAIN;
          ?$imem_rd_en
@@ -125,7 +125,6 @@
             $func3[2:0] = $instr[14:12];
          ?$func7_valid
             $func7[6:0] = $instr[31:25];
-            `BOGUS_USE($func7);
          
          // instruction decoding (rv32i w/o R4 instrs)
          $dec_bits[10:0] = { $instr[30], $func3, $opcode };
@@ -279,8 +278,8 @@
    
    // Connect Tiny Tapeout outputs. Note that uio_ outputs are not available in the Tiny-Tapeout-3-based FPGA boards.
    //*uo_out = {6'b0, *failed, *passed};
-   m5_if_neq(m5_target, FPGA, ['*uio_out = 8'b0;'])
-   m5_if_neq(m5_target, FPGA, ['*uio_oe = 8'b0;'])
+   //m5_if_neq(m5_target, FPGA, ['*uio_out = 8'b0;'])
+   //m5_if_neq(m5_target, FPGA, ['*uio_oe = 8'b0;'])
    
    // Macro instantiations to be uncommented when instructed for:
    //  o instruction memory
@@ -326,50 +325,51 @@ m5_if(m5_debounce_inputs, ['m5_tt_top(m5_my_design)'])
 module spi_wrapper
 (
   // Control/Data Signals
-  input wire clk,                       // system clock
-  input wire rst_n,                     // active-low reset
+  input logic clk,                       // system clock
+  input logic rst_n,                     // active-low reset
   
   // CSR
-  output reg [7:0] rx_buff,             // MOSI buffer - populates when SPI recieves a full byte
-  output reg rx_valid,                  // pulsed if successfully recieved a full byte
-  input wire [7:0] tx_buff,             // MISO buffer - pulled into r_tx_buff when tx_valid is set high by the CPU (NOT IMPLEMENTED)
-  input reg tx_valid,                   // pulsed if ready to transmit data (NOT IMPLEMENTED)
-  output reg mode,                      // 0 if boot, 1 if echo
-  output reg cmd_error,                 // asserts when an invalid cmd is given, must reset to clear
+  output logic [7:0] rx_buff,             // MOSI buffer - populates when SPI recieves a full byte
+  output logic rx_valid,                  // pulsed if successfully recieved a full byte
+  input logic [7:0] tx_buff,             // MISO buffer - pulled into r_tx_buff when tx_valid is set high by the CPU (NOT IMPLEMENTED)
+  input logic tx_valid,                   // pulsed if ready to transmit data (NOT IMPLEMENTED)
+  output logic mode,                      // 0 if boot, 1 if echo
+  output logic cmd_error,                 // asserts when an invalid cmd is given, must reset to clear
   
   // CPU program signals
-  output wire cpu_rst_n,                // hold CPU in reset when programming in boot mode
-  output reg imem_wr_en,                // write enable for instruction memory
-  output reg [31:0] prog_instr,         // instruction used to write to memory
-  output reg [3:0] prog_addr,           // address used to write to memory
+  output logic cpu_rst_n,                // hold CPU in reset when programming in boot mode
+  output logic imem_wr_en,                // write enable for instruction memory
+  output logic [31:0] prog_instr,         // instruction used to write to memory
+  output logic [3:0] prog_addr,           // address used to write to memory
   
   // SPI Interface
-  input wire sclk,                      // SPI clock
-  input wire cs,                        // chip select (active-low)
-  input wire mosi,                      // SPI recieve data
-  output wire miso                      // SPI transmit data
+  input logic sclk,                      // SPI clock
+  input logic cs,                        // chip select (active-low)
+  input logic mosi,                      // SPI recieve data
+  output logic miso                      // SPI transmit data
 );
   
-  reg [2:0] rx_bit_count;           
-  reg [7:0] r_rx_buff;              
-  reg [7:0] r_rx_buff_temp;         
-  reg rx1_done, rx2_done, rx3_done;    // clock domain crossing signals
+  logic [2:0] rx_bit_count;           
+  logic [7:0] r_rx_buff;              
+  logic [7:0] r_rx_buff_temp;         
+  logic rx1_done, rx2_done, rx3_done;    // clock domain crossing signals
    
-  reg [7:0] rx_cmd;            		   // command recieved in the last byte
-  reg rx_grab_cmd_n;           		   // flip-flop between decoding command
+  logic [7:0] rx_cmd;            		   // command recieved in the last byte
+  logic rx_grab_cmd_n;           		   // flip-flop between decoding command
                                        // or operating on current data byte
  
-  reg [2:0] tx_bit_count;
-  reg [7:0] r_tx_buff;
-  reg response_valid;                  // echo mode internal tx start signal
-  reg miso_bit;                         
+  logic [2:0] tx_bit_count;
+  logic [2:0] tx_bit_count_prev;             // used to invalidate echo response
+  logic [7:0] r_tx_buff;
+  logic response_valid;                  // echo mode internal tx start signal
+  logic miso_bit;                         
   assign miso = miso_bit;
   
-  reg [7:0] hh_byte;                   // instruction [31:24]
-  reg [7:0] hl_byte;                   // instruction [23:16]
-  reg [7:0] lh_byte;                   // instruction [15:8]
-  reg [7:0] ll_byte;                   // instruction [7:0]
-  reg [3:0] imem_address;              
+  logic [7:0] hh_byte;                   // instruction [31:24]
+  logic [7:0] hl_byte;                   // instruction [23:16]
+  logic [7:0] lh_byte;                   // instruction [15:8]
+  logic [7:0] ll_byte;                   // instruction [7:0]
+  logic [3:0] imem_address;              
   
    
   // rx spi and global cock domain crossing
@@ -396,9 +396,8 @@ module spi_wrapper
         end
      end
   end
-  
   // receive mosi bits from spi clk
-  always @(posedge sclk) begin
+  always @(posedge sclk, posedge cs) begin
 	  if (cs) begin // hold in reset when not selected
         rx_bit_count <= 3'b0;
         rx1_done <= 1'b0;
@@ -430,14 +429,16 @@ module spi_wrapper
   */
   
   // clock out tx byte when there is a tx byte (echo)
-  always @(posedge sclk) begin
+  always @(posedge sclk, posedge cs) begin
      if (cs) begin
         tx_bit_count <= 3'b111;   // send MSB first
+        tx_bit_count_prev <= 3'b111;
         miso_bit <= r_tx_buff[7]; // reset to MSB
      end else begin
         // with 2 modes - only able to tx if in echo mode
         // future work would implement cpu control over tx_buff and tx_valid
-        if (mode == 1'b1 && response_valid) begin
+        if (mode == 1'b1) begin
+           tx_bit_count_prev <= tx_bit_count;
            tx_bit_count <= tx_bit_count - 1;
            miso_bit <= r_tx_buff[tx_bit_count];
         end else begin
@@ -499,6 +500,7 @@ module spi_wrapper
                         end
                 8'hc6 : begin 
                          mode <= 1'b1;                        // enter echo mode
+                         cpu_rst_n <= 1'b1;                   // de-assert cpu reset when not in boot
                         end
                 8'hc7 : begin
                          mode <= 1'b0;                        // do nothing
@@ -510,21 +512,20 @@ module spi_wrapper
                rx_grab_cmd_n <= 1'b0;                         // next byte is a cmd
            end // end rx_grab_cmd_n
         end else begin // echo mode
-           cpu_rst_n <= 1'b1;                                 // de-assert cpu reset when not in boot
-           r_tx_buff <= r_rx_buff;                            // load TRANSMIT buffer with RECIEVED buffer 
-           response_valid <= 1'b1;
-           if(r_rx_buff == 8'hc7) begin                       // re-enter boot if in echo mode and cmd is recieved
-              mode <= 1'b0;
-           end
+         if(r_rx_buff == 8'hc7) begin                       // re-enter boot if in echo mode and cmd is recieved
+            mode <= 1'b0;
+         end
+         response_valid <= 1'b1;
+         r_tx_buff <= r_rx_buff;                            // load TRANSMIT buffer with RECIEVED buffer 
         end // end mode
-     end else if(tx_bit_count == 3'b0) begin                  // de-assert response_valid after tx complete
+     end else if(tx_bit_count_prev == 3'b000) begin                  // de-assert response_valid after tx complete
         response_valid <= 1'b0;                               // (can probably move up into echo mode case)
      end else begin
         imem_wr_en <= 1'b0;                                   // de-assert write enable on cmd (only happens when doing nothing in boot mode)
      end // end byte recieved
   end // end spi internal command
-
 endmodule
+
                    
 \SV
 

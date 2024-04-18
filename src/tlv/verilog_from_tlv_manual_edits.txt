@@ -11,7 +11,7 @@
     - 'top' is needed in makerchip and is the test bench generator. makerchip will yell at you if you try
        and remove it in source TL-V. This should clear up some linter warnings
 
-5. Change IMEM initilization from address # to all 0's
+5. Change IMEM initilization from address #imem to all 0's
     - initial it initilizes everything to the respective address number for debugging but need to change it to all 0's
 
 6. Get rid of any use of `BOGUS_USE() from TL-V
