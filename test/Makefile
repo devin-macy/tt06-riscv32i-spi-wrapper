@@ -52,6 +52,7 @@ BIN = $(TOP).vvp
 WAVE = $(TOP).vcd
 
 nothing:
+	touch results.xml
 
 $(BIN): $(SRC) $(TEST_SRC)
 	iverilog $(SRC) $(TEST_SRC) -o $(BIN) -s $(TOP) -g2012
@@ -68,4 +69,4 @@ view: $(BIN)
 	gtkwave $(WAVE)
 
 clean:
-	rm -f *.vvp *.vcd *.out
+	rm -f *.vvp *.vcd *.out results.xml
