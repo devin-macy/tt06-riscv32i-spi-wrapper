@@ -39,7 +39,7 @@ TOPLEVEL = tb
 MODULE = test
 
 # include cocotb's make rules to take care of the simulator setup
-# include $(shell cocotb-config --makefiles)/Makefile.sim
+include $(shell cocotb-config --makefiles)/Makefile.sim
 
 # --------------------------------------------------------------------------------------------------
 
@@ -50,9 +50,6 @@ TEST_SRC = ./tb_spi_wrapper.sv
 
 BIN = $(TOP).vvp
 WAVE = $(TOP).vcd
-
-nothing:
-	touch results.xml
 
 $(BIN): $(SRC) $(TEST_SRC)
 	iverilog $(SRC) $(TEST_SRC) -o $(BIN) -s $(TOP) -g2012
