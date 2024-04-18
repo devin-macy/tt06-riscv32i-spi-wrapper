@@ -13,3 +13,6 @@
 
 5. Change IMEM initilization from address # to all 0's
     - initial it initilizes everything to the respective address number for debugging but need to change it to all 0's
+
+6. Get rid of any use of `BOGUS_USE() from TL-V
+    - macro isn't expanded sometimes for the ASIC flow from makerchip

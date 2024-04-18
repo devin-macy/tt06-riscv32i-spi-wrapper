@@ -1348,7 +1348,6 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
                         assign FpgaPins_Fpga_CPU_func3_a1[2:0] = FpgaPins_Fpga_CPU_instr_a1[14:12];
                      //_?$func7_valid
                         assign FpgaPins_Fpga_CPU_func7_a1[6:0] = FpgaPins_Fpga_CPU_instr_a1[31:25];
-                        `BOGUS_USE(FpgaPins_Fpga_CPU_func7_a1);
             
                      // instruction decoding (rv32i w/o R4 instrs)
                      assign FpgaPins_Fpga_CPU_dec_bits_a1[10:0] = { FpgaPins_Fpga_CPU_instr_a1[30], FpgaPins_Fpga_CPU_func3_a1, FpgaPins_Fpga_CPU_opcode_a1 };
