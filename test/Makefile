@@ -43,7 +43,7 @@ include $(shell cocotb-config --makefiles)/Makefile.sim
 
 # ------------ LOCAL TESTING OF JUST SPI WRAPPER OUTSIDE MAKERCHIP ----------------
 
-SRC = ../src/*.sv
+SRC = ../src/spi_wrapper.sv ../src/single_port_ram.sv
 
 TOP = tb_spi_wrapper
 TEST_SRC = ./tb_spi_wrapper.sv
