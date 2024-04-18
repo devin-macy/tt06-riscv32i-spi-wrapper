@@ -113,7 +113,7 @@ module spi_wrapper
      end else begin
         // with 2 modes - only able to tx if in echo mode
         // future work would implement cpu control over tx_buff and tx_valid
-        if (mode == 1'b1 && response_valid) begin
+        if (mode == 1'b1) begin
            tx_bit_count_prev <= tx_bit_count;
            tx_bit_count <= tx_bit_count - 1;
            miso_bit <= r_tx_buff[tx_bit_count];
@@ -190,9 +190,8 @@ module spi_wrapper
         end else begin // echo mode
          if(r_rx_buff == 8'hc7) begin                       // re-enter boot if in echo mode and cmd is recieved
             mode <= 1'b0;
-         end else if (1) begin                              // GET RID OF IT
-            response_valid <= 1'b1;
          end
+         response_valid <= 1'b1;
          r_tx_buff <= r_rx_buff;                            // load TRANSMIT buffer with RECIEVED buffer 
         end // end mode
      end else if(tx_bit_count_prev == 3'b000) begin                  // de-assert response_valid after tx complete

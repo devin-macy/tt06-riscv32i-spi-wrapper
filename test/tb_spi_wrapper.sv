@@ -91,29 +91,30 @@ module tb_spi_wrapper;
                          LOAD_ADDR, 8'h09,
                          WRITE_IMEM, 8'h66,
                          MODE_ECHO, 8'h66, 
-                         8'hff, 8'haa
+                         8'hCA, 8'hFE
   };
+
+  // reg [31:0] command = {MODE_ECHO, 8'h66, 8'hA5, 8'h0F};
 
   assign mosi = command[$left(command)];
 
   always @(posedge sclk) begin
     command <= command << 1;
-    // $display("%6d: command - %1b", cycles, command[$left(command)]);
-    // $display("        rx_bit_count - %3b", DUT.rx_bit_count);
   end
 
+  // print imem when write to memory
   always @(negedge imem_wr_en) begin
     print_imem();
   end
 
   always @(posedge sclk) begin
-    if(mode == 1) begin
+    if(!(DUT.tx_bit_count == 3'b111 && DUT.tx_bit_count_prev == 3'b111)) begin
       $write("%0b", miso);
     end
   end
 
   always_comb begin
-    if(DUT.rx_bit_count == 0) $display();
+    if(DUT.tx_bit_count == 3'b110 && DUT.tx_bit_count_prev == 3'b111) $display();
   end
 
   initial begin
@@ -129,16 +130,22 @@ module tb_spi_wrapper;
     cs <= 0;
 
     // receiving
-    sclk <= 1;
+    sclk <= 0;
     repeat (5) @(posedge clk);
-    for (integer i = 0; i < 2 * $left(command) + 1; i++) begin
-      #100 sclk <= !sclk;
-    end
 
+    // BOOT + program
+    spi_clk(12);
+    repeat (50) @(posedge clk);
+    
     // ECHO
-    for (integer i = 0; i < 0; i++) begin
-      #100 sclk <= !sclk;
-    end
+    spi_clk(2);
+
+    // tx and rx echo
+    spi_clk(3);
+
+    #100 sclk <= 1'b1;
+    #100 sclk <= 1'b0;
+
 
     repeat (100) @(posedge clk);
     $write("\n");
@@ -149,6 +156,15 @@ module tb_spi_wrapper;
     $display("Instruction Memory (%0d)", cycles);
     for(integer i = 0; i < MEM_DEPTH; i++) begin
       $display("Address %3d = %0h", i, imem.mem[i]);
+    end
+  endtask
+
+  task spi_clk(input [7:0] num_bytes);
+    for (integer i = 0; i < num_bytes; i++) begin
+      #200;
+      for(integer j = 0; j < 16; j++) begin
+        #100 sclk <= !sclk;
+      end
     end
   endtask
 
