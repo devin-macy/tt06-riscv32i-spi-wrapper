@@ -64,6 +64,3 @@ test: $(BIN)
 view: $(BIN)
 	vvp $(BIN)
 	gtkwave $(WAVE)
-
-clean:
-	rm -f *.vvp *.vcd *.out results.xml
