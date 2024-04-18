@@ -146,7 +146,6 @@ module tb_spi_wrapper;
     #100 sclk <= 1'b1;
     #100 sclk <= 1'b0;
 
-
     repeat (100) @(posedge clk);
     $write("\n");
     $finish();

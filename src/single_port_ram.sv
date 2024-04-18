@@ -3,6 +3,8 @@
 
 `timescale 1ns / 1ns
 
+// USED ONLY FOR TESTING THE SPI WRAPPER ALONE - NOT IN TOP LEVEL DESIGN
+
 module single_port_ram #(
     parameter MEMFILE = "",        //! Name of file to initialize memory
     parameter MEM_DEPTH = 8,    //! Number of memory entries
