@@ -1501,8 +1501,8 @@ logic [31:0] FpgaPins_Fpga_CPU_Xreg_value_a3 [15:0],
             
                // Connect Tiny Tapeout outputs. Note that uio_ outputs are not available in the Tiny-Tapeout-3-based FPGA boards.
                //*uo_out = {6'b0, *failed, *passed};
-               assign uio_out = 8'b0;
-               assign uio_oe = 8'b0;
+               // assign uio_out = 8'b0;
+               // assign uio_oe = 8'b0;
             
                // Macro instantiations to be uncommented when instructed for:
                //  o instruction memory
