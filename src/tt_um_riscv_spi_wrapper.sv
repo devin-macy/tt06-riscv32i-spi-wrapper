@@ -39,51 +39,51 @@
 module spi_wrapper
 (
 // Control/Data Signals
-input logic clk,                       // system clock
-input logic rst_n,                     // active-low reset
+input wire clk,                       // system clock
+input wire rst_n,                     // active-low reset
 
 // CSR
-output logic [7:0] rx_buff,             // MOSI buffer - populates when SPI recieves a full byte
-output logic rx_valid,                  // pulsed if successfully recieved a full byte
-input logic [7:0] tx_buff,             // MISO buffer - pulled into r_tx_buff when tx_valid is set high by the CPU (NOT IMPLEMENTED)
-input logic tx_valid,                   // pulsed if ready to transmit data (NOT IMPLEMENTED)
-output logic mode,                      // 0 if boot, 1 if echo
-output logic cmd_error,                 // asserts when an invalid cmd is given, must reset to clear
+output reg [7:0] rx_buff,             // MOSI buffer - populates when SPI recieves a full byte
+output reg rx_valid,                  // pulsed if successfully recieved a full byte
+input wire [7:0] tx_buff,             // MISO buffer - pulled into r_tx_buff when tx_valid is set high by the CPU (NOT IMPLEMENTED)
+input reg tx_valid,                   // pulsed if ready to transmit data (NOT IMPLEMENTED)
+output reg mode,                      // 0 if boot, 1 if echo
+output reg cmd_error,                 // asserts when an invalid cmd is given, must reset to clear
 
 // CPU program signals
-output logic cpu_rst_n,                // hold CPU in reset when programming in boot mode
-output logic imem_wr_en,                // write enable for instruction memory
-output logic [31:0] prog_instr,         // instruction used to write to memory
-output logic [3:0] prog_addr,           // address used to write to memory
+output wire cpu_rst_n,                // hold CPU in reset when programming in boot mode
+output reg imem_wr_en,                // write enable for instruction memory
+output reg [31:0] prog_instr,         // instruction used to write to memory
+output reg [3:0] prog_addr,           // address used to write to memory
 
 // SPI Interface
-input logic sclk,                      // SPI clock
-input logic cs,                        // chip select (active-low)
-input logic mosi,                      // SPI recieve data
-output logic miso                      // SPI transmit data
+input wire sclk,                      // SPI clock
+input wire cs,                        // chip select (active-low)
+input wire mosi,                      // SPI recieve data
+output wire miso                      // SPI transmit data
 );
 
-logic [2:0] rx_bit_count;
-logic [7:0] r_rx_buff;
-logic [7:0] r_rx_buff_temp;
-logic rx1_done, rx2_done, rx3_done;    // clock domain crossing signals
+reg [2:0] rx_bit_count;
+reg [7:0] r_rx_buff;
+reg [7:0] r_rx_buff_temp;
+reg rx1_done, rx2_done, rx3_done;    // clock domain crossing signals
 
-logic [7:0] rx_cmd;            		   // command recieved in the last byte
-logic rx_grab_cmd_n;           		   // flip-flop between decoding command
+reg [7:0] rx_cmd;            		   // command recieved in the last byte
+reg rx_grab_cmd_n;           		   // flip-flop between decoding command
                                     // or operating on current data byte
 
-logic [2:0] tx_bit_count;
-logic [2:0] tx_bit_count_prev;             // used to invalidate echo response
-logic [7:0] r_tx_buff;
-logic response_valid;                  // echo mode internal tx start signal
-logic miso_bit;
+reg [2:0] tx_bit_count;
+reg [2:0] tx_bit_count_prev;             // used to invalidate echo response
+reg [7:0] r_tx_buff;
+reg response_valid;                  // echo mode internal tx start signal
+reg miso_bit;
 assign miso = miso_bit;
 
-logic [7:0] hh_byte;                   // instruction [31:24]
-logic [7:0] hl_byte;                   // instruction [23:16]
-logic [7:0] lh_byte;                   // instruction [15:8]
-logic [7:0] ll_byte;                   // instruction [7:0]
-logic [3:0] imem_address;
+reg [7:0] hh_byte;                   // instruction [31:24]
+reg [7:0] hl_byte;                   // instruction [23:16]
+reg [7:0] lh_byte;                   // instruction [15:8]
+reg [7:0] ll_byte;                   // instruction [7:0]
+reg [3:0] imem_address;
 
 
 // rx spi and global cock domain crossing
