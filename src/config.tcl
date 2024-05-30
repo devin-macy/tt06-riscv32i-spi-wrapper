@@ -27,7 +27,7 @@ set ::env(RUN_LINTER) 1
 set ::env(LINTER_INCLUDE_PDK_MODELS) 1
 
 # unmapped cells workaround 
-set ::env(SYNTH_STRATEGY) {DELAY 1}
+set ::env(SYNTH_STRATEGY) {AREA 3}
 
 # Configuration docs: https://openlane.readthedocs.io/en/latest/reference/configuration.html
 
