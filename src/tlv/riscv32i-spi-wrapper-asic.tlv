@@ -33,8 +33,8 @@
                                    /// m5_neq(m5_MAKERCHIP, 1): Debounce unless in Makerchip.
 
    // CPU configs
-   var(num_regs, 16)  // 32 for full reg file.
-   var(dmem_size, 8)  // Size of DMem, a power of 2.
+   var(num_regs, 32)  // 32 for full reg file.
+   var(dmem_size, 32)  // Size of DMem, a power of 2.
    
    
    // ======================
@@ -69,13 +69,13 @@
          $imem_addr[3:0] = ($reset) ? *spi_prog_addr : $pc[5:2];
          
       @1 
-         /imem[15:0]
-            $wr = |cpu$imem_wr_en && (|cpu$imem_addr[3:0] == #imem);
+         /imem[31:0]
+            $wr = |cpu$imem_wr_en && (|cpu$imem_addr[4:0] == #imem);
             $value[31:0] = *reset ? 32'b0 :
                            $wr    ? |cpu$imem_wr_data :
                                     $RETAIN;
          ?$imem_rd_en
-            $imem_rd_data[31:0] = /imem[$imem_addr[3:0]]>>1$value;
+            $imem_rd_data[31:0] = /imem[$imem_addr[4:0]]>>1$value;
          
          
          $imem_wr_en = *spi_imem_wr_en;

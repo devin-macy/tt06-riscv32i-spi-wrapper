@@ -2,3 +2,4 @@ Commit, Tiles, Utilization, Time for GDS, Linter Warnings, Synth Warnings, Comme
 820074d, 4x2, 70.19, 1h 25m, 15, 4, first passing gds files
 36d47ee, 4x2, N/A, 34m 33s, 15, 0, tried commenting out some makerchip macro's for the fpga lab but didn't work previously. reverted changes and removed debounce wrapper
 d7eb6df, 4x2, N/A, 39m 31s, 21, 0, removed some makerchip fpga vizualization signals. since the previous commit - the utilization percentage stopped showing up after completion
+c9529d3, 8x2, 34.9, 28m 16s, 21, 0, more area avaliable. post TT06 seg fault disaster in opeelane portion of the flow. updates spi module and additional generated code cleanup
